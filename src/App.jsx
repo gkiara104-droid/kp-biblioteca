@@ -252,7 +252,13 @@ function fromDbLeido(row) {
 function toDbLeido(obj) {
   const { mesLeido, id, ...rest } = obj;
   const row = { ...rest, mes_leido: mesLeido };
-  if (id && typeof id === 'number' && id < 2000000000) row.id = id; // solo IDs reales de DB
+  if (id && typeof id === 'number' && id < 2000000000) row.id = id;
+  // Limpiar campos numéricos vacíos
+  if (row.paginas === '' || row.paginas === null) row.paginas = null;
+  else row.paginas = Number(row.paginas);
+  ['personaje','prosa','trama','aprendizaje','entretenimiento','total'].forEach(k => {
+    row[k] = Number(row[k]) || 0;
+  });
   return row;
 }
 function toDbBiblioteca(obj) {
