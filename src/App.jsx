@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "./supabaseClient.js";
 
-const GENEROS_LIST = ["Amor y familia","Autoayuda","Biología","Ciencia","Dinero y finanzas","Fantasía","Ficción","Filosofía","Física","Historia","Ingeniería","Lectura","Literatura","Memorias","Negocios","Poesía","Política","Productividad","Psicología","Realizamiento","Research","Romance","Salud","Work-life balance"];
+const GENEROS_LIST = ["Amor y familia","Autoayuda","Biología","Ciencia","Dinero y finanzas","Fantasía","Ficción","Filosofía","Física","Historia","Ingeniería","Lectura","Literatura","Memorias","Negocios","Poesía","Política","Productividad","Psicología","Realizamiento","Research","Romance","Salud","Work-life balance","Mitología"];
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const FORMATOS = ["Ebook","Papel"];
-const C = { darkCyan:"#033331", medCyan:"#0d3d3b", deepCyan:"#05af6a", medOrange:"#f8dfa9", paleOrange:"#f8f1e4", K:"#05af6a", P:"#f8dfa9" };
+const C = { darkCyan:"#033331", medCyan:"#0d3d3b", deepCyan:"#05af6a", medOrange:"#f8dfa9", paleOrange:"#f8f1e4", K:"#f8dfa9", P:"#05af6a" };
 
 const SEED_LEIDOS = [
  
