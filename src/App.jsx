@@ -7,239 +7,11 @@ const FORMATOS = ["Ebook","Papel"];
 const C = { darkCyan:"#033331", medCyan:"#0d3d3b", deepCyan:"#05af6a", medOrange:"#f8dfa9", paleOrange:"#f8f1e4", K:"#05af6a", P:"#f8dfa9" };
 
 const SEED_LEIDOS = [
-  {titulo:"Circe",autor:"Madelline Miller",generos:["Lectura"],formato:"Papel",personaje:9,prosa:8,trama:8,aprendizaje:3,entretenimiento:8.5,total:7.3,mes_leido:"Enero",paginas:448,lector:"P"},
-  {titulo:"Slow productivity",autor:"Cal Newport",generos:["Productividad"],formato:"Ebook",personaje:6,prosa:7,trama:6,aprendizaje:9,entretenimiento:5,total:6.6,mes_leido:"Enero",paginas:256,lector:"P"},
-  {titulo:"The top 5 regrets of the dying",autor:"Bronnie Ware",generos:["Filosofía"],formato:"Ebook",personaje:8,prosa:9,trama:9,aprendizaje:10,entretenimiento:7,total:8.6,mes_leido:"Febrero",paginas:245,lector:"P"},
-  {titulo:"Danzante del filo",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],formato:"Ebook",personaje:9,prosa:7,trama:10,aprendizaje:4,entretenimiento:10,total:8,mes_leido:"Enero",paginas:150,lector:"P"},
-  {titulo:"Todos nuestros ayeres",autor:"Natalia Ginzburg",generos:["Literatura"],formato:"Ebook",personaje:6,prosa:4,trama:4,aprendizaje:2,entretenimiento:5,total:4.2,mes_leido:"Enero",paginas:150,lector:"P"},
+ 
 ];
 
 const SEED_BIBLIOTECA = [
-  {titulo:"Sin límites",autor:"Jim Kwik",generos:["Realizamiento"],paginas:null},
-  {titulo:"Start with no",autor:"Jim Camp",generos:["Negocios"],paginas:null},
-  {titulo:"Never eat alone",autor:"Keith Ferrazzi",generos:["Amor y familia"],paginas:null},
-  {titulo:"The minimalist entrepeneur",autor:"Sahil Lavingia",generos:["Negocios"],paginas:null},
-  {titulo:"La caída de Númenor",autor:"J.R.R.Tolkien",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Atrévete a no gustar",autor:"Fumitake Koga",generos:["Autoayuda"],paginas:null},
-  {titulo:"Predictably irrational",autor:"Dan Ariely",generos:["Psicología"],paginas:null},
-  {titulo:"Anything you want",autor:"Derek Sivers",generos:["Negocios"],paginas:null},
-  {titulo:"The 4-hour body",autor:"Tim Ferriss",generos:["Salud"],paginas:null},
-  {titulo:"Miracle morning",autor:"Hal Elrod",generos:["Productividad"],paginas:null},
-  {titulo:"The science of getting rich",autor:"Wallace Wattles",generos:["Dinero y finanzas"],paginas:null},
-  {titulo:"Work Rules!",autor:"Lazslo Bock",generos:["Negocios"],paginas:null},
-  {titulo:"I will teach you to be rich",autor:"Ramt Sethi",generos:["Dinero y finanzas"],paginas:null},
-  {titulo:"Closer to love",autor:"Vex King",generos:["Amor y familia"],paginas:null},
-  {titulo:"De cero a uno",autor:"Peter Thiel",generos:["Negocios"],paginas:null},
-  {titulo:"Women don't own you pretty",autor:"Florence Given",generos:["Política"],paginas:null},
-  {titulo:"Think and grow rich",autor:"Napoleon Hill",generos:["Dinero y finanzas"],paginas:null},
-  {titulo:"The 7 habits of high effective people",autor:"Stephen Covey",generos:["Productividad"],paginas:null},
-  {titulo:"El primer minuto",autor:"Chris Fenning",generos:["Amor y familia"],paginas:null},
-  {titulo:"Think big",autor:"Dr. Grace Lordan",generos:["Autoayuda"],paginas:null},
-  {titulo:"El arte de pensar",autor:"Rolf Dobelli",generos:["Realizamiento"],paginas:null},
-  {titulo:"The courage to be",autor:"Paul Tillich",generos:["Filosofía"],paginas:null},
-  {titulo:"The untethered soul",autor:"Michael Singer",generos:["Filosofía"],paginas:null},
-  {titulo:"Why has no one told me this before",autor:"Jordan Peterson",generos:["Autoayuda"],paginas:null},
-  {titulo:"La montaña eres tú",autor:"Brianna Wiest",generos:["Autoayuda"],paginas:null},
-  {titulo:"Radical Candor",autor:"Kim Scott",generos:["Negocios"],paginas:null},
-  {titulo:"El aliento de los dioses",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Steal like an artist",autor:"Austin Kleon",generos:["Psicología"],paginas:null},
-  {titulo:"Pensar deprisa, pensar despacio",autor:"Daniel Kahnemann",generos:["Psicología","Productividad"],paginas:null},
-  {titulo:"El poder de los hábitos",autor:"Charles Duhigg",generos:["Productividad"],paginas:null},
-  {titulo:"Rich dad, poor dad",autor:"Robert Kiyosaki",generos:["Dinero y finanzas"],paginas:null},
-  {titulo:"Lost connections",autor:"Johann Harri",generos:["Salud"],paginas:null},
-  {titulo:"22 inmutable laws of marketing",autor:"Ries and Trout",generos:["Negocios"],paginas:null},
-  {titulo:"Decisive",autor:"Chip and Dan Heath",generos:["Work-life balance"],paginas:null},
-  {titulo:"The psychology of money",autor:"Morgan Housel",generos:["Dinero y finanzas"],paginas:null},
-  {titulo:"Mating in captivity",autor:"Esther Perel",generos:["Amor y familia"],paginas:null},
-  {titulo:"Obtenga el sí",autor:"Roger Fisher",generos:["Negocios"],paginas:null},
-  {titulo:"Invisible woman",autor:"Caroline Criado",generos:["Amor y familia","Política"],paginas:null},
-  {titulo:"El héroe de las eras",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"No hay partes malas",autor:"Richard Swortz",generos:["Psicología"],paginas:null},
-  {titulo:"Conversaciones difíciles",autor:"Douglas Stone",generos:["Amor y familia"],paginas:null},
-  {titulo:"Things you can see when you slow down",autor:"Haemin Sumin",generos:["Realizamiento"],paginas:null},
-  {titulo:"The subtle art of not giving a fuck",autor:"Mark Manson",generos:["Realizamiento"],paginas:null},
-  {titulo:"The art of procastination",autor:"John Perry",generos:["Productividad"],paginas:null},
-  {titulo:"Think again",autor:"Adam Grant",generos:["Psicología"],paginas:null},
-  {titulo:"El metal perdido",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Donde viven las musas",autor:"Marianela dos Santos",generos:["Poesía"],paginas:null},
-  {titulo:"Far from the tree",autor:"Andrew Solomon",generos:["Amor y familia"],paginas:null},
-  {titulo:"Bounce",autor:"Matthew Syed",generos:["Psicología"],paginas:null},
-  {titulo:"Black Box Thinking",autor:"Matthew Syed",generos:["Negocios"],paginas:null},
-  {titulo:"Come as you are",autor:"Emily Nagoski",generos:["Amor y familia","Salud"],paginas:null},
-  {titulo:"The Antidote",autor:"Oliver Burkeman",generos:["Realizamiento"],paginas:null},
-  {titulo:"Generación dopamina",autor:"Anna Lembke",generos:["Psicología"],paginas:null},
-  {titulo:"Mindset",autor:"Carol Dweck",generos:["Psicología"],paginas:null},
-  {titulo:"Made to stick",autor:"Chip y Dan Heath",generos:["Work-life balance","Negocios"],paginas:null},
-  {titulo:"Eat that frog",autor:"Brian Tracey",generos:["Productividad"],paginas:null},
-  {titulo:"Quiet",autor:"Susan Cain",generos:["Psicología"],paginas:null},
-  {titulo:"La bolsa o la vida",autor:"Joe Dominguez",generos:["Dinero y finanzas"],paginas:null},
-  {titulo:"The Silmarillion",autor:"J.R.R.Tolkien",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Traction",autor:"Gino Wickman",generos:["Negocios"],paginas:null},
-  {titulo:"Camino de reyes",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Lifespan",autor:"David Sinclair",generos:["Salud"],paginas:null},
-  {titulo:"Proyecto Hail Mary",autor:"Andy Weir",generos:["Ficción","Ciencia"],paginas:null},
-  {titulo:"Esquirla del amanecer",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Lo que nunca quise escribir",autor:"Marianela dos Santos",generos:["Poesía"],paginas:null},
-  {titulo:"The war of art",autor:"Steven Pressfield",generos:["Psicología"],paginas:null},
-  {titulo:"Educated",autor:"Tara Westover",generos:["Memorias"],paginas:null},
-  {titulo:"El arte de la guerra",autor:"Sun Tzu",generos:["Filosofía"],paginas:null},
-  {titulo:"La crisis de la narración",autor:"Byung-Chul Han",generos:["Psicología"],paginas:null},
-  {titulo:"Finish what you start",autor:"Peter Hollins",generos:["Productividad"],paginas:null},
-  {titulo:"Arcanum Ilimitado",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"So good they can't ignore you",autor:"Cal Newport",generos:["Negocios"],paginas:null},
-  {titulo:"Las leyes de la naturaleza humana",autor:"Robert Greene",generos:["Psicología"],paginas:null},
-  {titulo:"12 more rules of life",autor:"Jordan Peterson",generos:["Autoayuda"],paginas:null},
-  {titulo:"Solve for happy",autor:"Mo Gawdat",generos:["Realizamiento"],paginas:null},
-  {titulo:"El pozo de la ascensión",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"How to change your mind",autor:"Michael Pollan",generos:["Salud","Psicología"],paginas:null},
-  {titulo:"La caída de Gondolin",autor:"J.R.R.Tolkien",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"El ritmo de la guerra",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Bigger Leaner Stronger",autor:"Michael Matthews",generos:["Salud"],paginas:null},
-  {titulo:"The compound effect",autor:"Darren Hardy",generos:["Dinero y finanzas"],paginas:null},
-  {titulo:"Start with why",autor:"Simon Sinek",generos:["Negocios"],paginas:null},
-  {titulo:"Los hijos de Húrin",autor:"J.R.R.Tolkien",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Mastery",autor:"Robert Greene",generos:["Psicología"],paginas:null},
-  {titulo:"8 rules of love",autor:"Jay Shetty",generos:["Amor y familia","Romance"],paginas:null},
-  {titulo:"La disciplina marcará tu destino",autor:"Ryan Holiday",generos:["Autoayuda"],paginas:null},
-  {titulo:"We should all be feminists",autor:"Chimamanda Ngozi",generos:["Política"],paginas:null},
-  {titulo:"Happy Sexy Millionaire",autor:"Steven Bartlett",generos:["Realizamiento"],paginas:null},
-  {titulo:"The richest man in Babylon",autor:"George Clason",generos:["Dinero y finanzas"],paginas:null},
-  {titulo:"The pathless path",autor:"Paul Millard",generos:["Work-life balance"],paginas:null},
-  {titulo:"Unconditional parenting",autor:"Alfie Kohn",generos:["Amor y familia"],paginas:null},
-  {titulo:"Inspired",autor:"Marty Cagan",generos:["Negocios"],paginas:null},
-  {titulo:"El ego es el enemigo",autor:"Ryan Holiday",generos:["Autoayuda"],paginas:null},
-  {titulo:"Tao te ching: el libro del camino",autor:"Lao Tzu",generos:["Realizamiento","Filosofía"],paginas:null},
-  {titulo:"Rework",autor:"Jason Fried",generos:["Negocios"],paginas:null},
-  {titulo:"El poder del ahora",autor:"Eckhart Talle",generos:["Realizamiento"],paginas:null},
-  {titulo:"A guide to the good life",autor:"William Irvine",generos:["Filosofía"],paginas:null},
-  {titulo:"The way of Zen",autor:"Alan Watts",generos:["Filosofía"],paginas:null},
-  {titulo:"Good vibes, good life",autor:"Vex King",generos:["Amor y familia"],paginas:null},
-  {titulo:"The 48 laws of power",autor:"Robert Greene",generos:["Psicología"],paginas:null},
-  {titulo:"Palabras radiantes",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Hábitos Atómicos",autor:"James Clear",generos:["Autoayuda","Productividad"],paginas:null},
-  {titulo:"Elantris",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Cuatro mil semanas",autor:"Oliver Burkeman",generos:["Work-life balance","Filosofía"],paginas:null},
-  {titulo:"El estrecho sendero entre deseos",autor:"Pat Rothfuss",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Juramentada",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Freakonomics",autor:"Steven Levitt",generos:["Dinero y finanzas","Psicología"],paginas:null},
-  {titulo:"Hiperfoco",autor:"Chris Bailey",generos:["Productividad"],paginas:null},
-  {titulo:"The daily stoic",autor:"Ryan Holiday",generos:["Filosofía"],paginas:null},
-  {titulo:"12 rules of life",autor:"Jordan Peterson",generos:["Autoayuda","Filosofía"],paginas:null},
-  {titulo:"Sombras de identidad",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Why we sleep",autor:"Matthew Walker",generos:["Salud"],paginas:null},
-  {titulo:"El camino de los reyes",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"La historia de Beren y Luthien",autor:"J.R.R.Tolkien",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Five love languages",autor:"Gary Chapman",generos:["Amor y familia"],paginas:null},
-  {titulo:"How to win friends",autor:"Dale Carnegie",generos:["Autoayuda"],paginas:null},
-  {titulo:"The body keeps the score",autor:"Bessel van der Kolk",generos:["Salud","Psicología"],paginas:null},
-  {titulo:"Getting things done",autor:"David Allen",generos:["Productividad"],paginas:null},
-  {titulo:"Mind the gap",autor:"Esther Perel",generos:["Amor y familia"],paginas:null},
-  {titulo:"Effortless",autor:"Greg Mckeown",generos:["Autoayuda","Productividad"],paginas:null},
-  {titulo:"The simple path to wealth",autor:"J.L. Collins",generos:["Dinero y finanzas"],paginas:null},
-  {titulo:"The school of life",autor:"Alain de Botton",generos:["Filosofía"],paginas:null},
-  {titulo:"The power of vulnerability",autor:"Berné Brown",generos:["Psicología"],paginas:null},
-  {titulo:"Brazales de duelo",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"The one thing",autor:"Gary Keller",generos:["Productividad"],paginas:null},
-  {titulo:"Rodeado de idiotas",autor:"Thomas Erikson",generos:["Amor y familia","Psicología"],paginas:null},
-  {titulo:"Contra la empatía",autor:"Paul Bloom",generos:["Psicología"],paginas:null},
-  {titulo:"Deep work",autor:"Cal Newport",generos:["Productividad"],paginas:null},
-  {titulo:"Algorithms to live by",autor:"Brian Christian",generos:["Psicología","Ciencia"],paginas:null},
-  {titulo:"El temor de un hombre sabio",autor:"Pat Rothfuss",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"How to not die alone",autor:"Logan Ury",generos:["Amor y familia","Romance"],paginas:null},
-  {titulo:"Not a diet book",autor:"James Smith",generos:["Salud"],paginas:null},
-  {titulo:"Ikigai",autor:"Héctor García",generos:["Realizamiento"],paginas:null},
-  {titulo:"Never split the difference",autor:"Chris Voss",generos:["Negocios"],paginas:null},
-  {titulo:"El nombre del viento",autor:"Pat Rothfuss",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"El imperio final",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"How to stop worrying and start living",autor:"Dale Carnegie",generos:["Autoayuda"],paginas:null},
-  {titulo:"Grit",autor:"Angela Duckworth",generos:["Psicología","Negocios"],paginas:null},
-  {titulo:"The evolution of desire",autor:"David Buss",generos:["Amor y familia","Psicología"],paginas:null},
-  {titulo:"Talking to strangers",autor:"Malcolm Gladwell",generos:["Psicología"],paginas:null},
-  {titulo:"The Lean Startup",autor:"Eric Ries",generos:["Negocios"],paginas:null},
-  {titulo:"Man's search for meaning",autor:"Viktor Frankl",generos:["Filosofía"],paginas:null},
-  {titulo:"Breath",autor:"James Nestor",generos:["Salud"],paginas:null},
-  {titulo:"Cuentos inconclusos de la tierra media",autor:"J.R.R.Tolkien",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"El hobbit",autor:"J.R.R.Tolkien",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Outliers",autor:"Malcolm Gladwell",generos:["Psicología"],paginas:null},
-  {titulo:"The tipping point",autor:"Malcolm Gladwell",generos:["Psicología"],paginas:null},
-  {titulo:"David and Goliath",autor:"Malcolm Gladwell",generos:["Psicología"],paginas:null},
-  {titulo:"What the dog saw",autor:"Malcolm Gladwell",generos:["Psicología"],paginas:null},
-  {titulo:"Inteligencia intuitiva",autor:"Malcolm Gladwell",generos:["Psicología"],paginas:null},
-  {titulo:"The surrender experiment",autor:"Michael Singer",generos:["Psicología"],paginas:null},
-  {titulo:"El cisne negro",autor:"Nassim Taleb",generos:["Psicología","Física"],paginas:null},
-  {titulo:"Vida 3.0",autor:"Max Tegmark",generos:["Ciencia"],paginas:null},
-  {titulo:"Jugarse la piel",autor:"Nassim Taleb",generos:["Psicología"],paginas:null},
-  {titulo:"Antifrágil",autor:"Nassim Taleb",generos:["Psicología"],paginas:null},
-  {titulo:"The happiness advantage",autor:"Shawn Anchor",generos:["Psicología"],paginas:null},
-  {titulo:"The creative act",autor:"Rick Rubin",generos:["Psicología"],paginas:null},
-  {titulo:"El hombre iluminado",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Viento y verdad",autor:"Brandon Sanderson",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"El señor de los anillos",autor:"J.R.R.Tolkien",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"How to take smart notes",autor:"Sonke Ahrens",generos:["Productividad"],paginas:null},
-  {titulo:"La inteligencia emocional",autor:"Daniel Goleman",generos:["Psicología"],paginas:null},
-  {titulo:"Kafka en la orilla",autor:"Haruki Murakami",generos:["Filosofía","Literatura"],paginas:null},
-  {titulo:"The molecule of more",autor:"Daniel Lieberman",generos:["Psicología","Ciencia"],paginas:null},
-  {titulo:"Sapiens",autor:"Yuval Harari",generos:["Historia","Biología"],paginas:null},
-  {titulo:"The body",autor:"Bill Bryson",generos:["Biología","Salud"],paginas:null},
-  {titulo:"Before the coffee gets cold",autor:"Kawaguchi",generos:["Literatura","Romance"],paginas:null},
-  {titulo:"How we learn",autor:"Stanislas Dehaene",generos:["Productividad","Ciencia"],paginas:null},
-  {titulo:"10x is easier than 2x",autor:"Dan Sullivan",generos:["Productividad","Negocios"],paginas:null},
-  {titulo:"Self Compassion",autor:"Kristin Neff",generos:["Psicología"],paginas:null},
-  {titulo:"The Hidden Life of trees",autor:"Peter Wohlleben",generos:["Biología"],paginas:null},
-  {titulo:"The righteous mind",autor:"Jonathan Haidt",generos:["Política","Psicología"],paginas:null},
-  {titulo:"The silk roads",autor:"Peter Frankopan",generos:["Historia"],paginas:null},
-  {titulo:"Katabasis",autor:"R.F.Kuang",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"La vida invisible de Addie LaRue",autor:"V.E.Schwab",generos:["Lectura","Fantasía","Romance"],paginas:null},
-  {titulo:"El imperio del vampiro",autor:"Jay Kristoff",generos:["Lectura","Fantasía"],paginas:null},
-  {titulo:"Carl el Mazmorrero",autor:"Matt Dinniman",generos:["Lectura","Fantasía"],paginas:null},
-  {titulo:"Aprendiz de asesino",autor:"Robin Hobb",generos:["Lectura","Fantasía"],paginas:null},
-  {titulo:"La voluntad de muchos",autor:"James Islington",generos:["Lectura","Fantasía"],paginas:null},
-  {titulo:"Glucose Revolution",autor:"Jessie Inchauspé",generos:["Salud"],paginas:null},
-  {titulo:"La primera ley (trilogía)",autor:"Joe Abercrombie",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"La Era de la locura (trilogía)",autor:"Joe Abercrombie",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"La mejor venganza",autor:"Joe Abercrombie",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Tierras rojas",autor:"Joe Abercrombie",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Los diablos",autor:"Joe Abercrombie",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Ciudad de hueso",autor:"Cassandra Clare",generos:["Ficción","Fantasía","Romance"],paginas:null},
-  {titulo:"Ciudad de cenizas",autor:"Cassandra Clare",generos:["Ficción","Fantasía","Romance"],paginas:null},
-  {titulo:"Ciudad de cristal",autor:"Cassandra Clare",generos:["Ficción","Fantasía","Romance"],paginas:null},
-  {titulo:"Ángel mecánico",autor:"Cassandra Clare",generos:["Ficción","Fantasía","Romance"],paginas:null},
-  {titulo:"Príncipe mecánico",autor:"Cassandra Clare",generos:["Ficción","Fantasía","Romance"],paginas:null},
-  {titulo:"Princesa mecánica",autor:"Cassandra Clare",generos:["Ficción","Fantasía","Romance"],paginas:null},
-  {titulo:"Ciudad de los ángeles caídos",autor:"Cassandra Clare",generos:["Ficción","Fantasía","Romance"],paginas:null},
-  {titulo:"Lady Midnight",autor:"Cassandra Clare",generos:["Ficción","Fantasía","Romance"],paginas:null},
-  {titulo:"El señor de las sombras",autor:"Cassandra Clare",generos:["Ficción","Fantasía","Romance"],paginas:null},
-  {titulo:"La reina del aire y la oscuridad",autor:"Cassandra Clare",generos:["Ficción","Fantasía","Romance"],paginas:null},
-  {titulo:"Hábitos atómicos en acción",autor:"James Clear",generos:["Autoayuda","Productividad"],paginas:null},
-  {titulo:"How to build a car",autor:"Adrian Newey",generos:["Research","Memorias"],paginas:null},
-  {titulo:"Race car aerodynamics",autor:"Joseph Katz",generos:["Research","Ingeniería"],paginas:null},
-  {titulo:"Aerodynamics of road vehicles",autor:"Wolf Hucho",generos:["Research","Ingeniería"],paginas:null},
-  {titulo:"Out of the wreckage",autor:"George Monbiot",generos:["Política"],paginas:null},
-  {titulo:"Moral Ambition",autor:"Rutger Bregman",generos:["Política"],paginas:null},
-  {titulo:"El señor de las moscas",autor:"William Golding",generos:["Literatura","Ficción"],paginas:null},
-  {titulo:"Anna Karenina",autor:"Leo Tolstoy",generos:["Literatura","Romance"],paginas:null},
-  {titulo:"1984",autor:"George Orwell",generos:["Literatura","Ficción"],paginas:null},
-  {titulo:"Granja Animal",autor:"George Orwell",generos:["Literatura","Ficción"],paginas:null},
-  {titulo:"Company of One",autor:"Paul Jarvis",generos:["Productividad","Negocios"],paginas:null},
-  {titulo:"Supercommunicators",autor:"Charles Duhigg",generos:["Psicología"],paginas:null},
-  {titulo:"Burnout",autor:"Emily Nagoski",generos:["Psicología","Salud"],paginas:null},
-  {titulo:"ADHD 2.0",autor:"John Ratey",generos:["Psicología","Salud"],paginas:null},
-  {titulo:"Ultra Processed People",autor:"Chris van Tulleken",generos:["Psicología","Salud"],paginas:null},
-  {titulo:"How emotions are made",autor:"Lisa Barrett",generos:["Psicología"],paginas:null},
-  {titulo:"Boys in Zinc",autor:"Svetlana Alexievich",generos:["Historia","Memorias"],paginas:null},
-  {titulo:"La Iliada",autor:"Homero",generos:["Historia","Literatura","Poesía"],paginas:null},
-  {titulo:"Meditaciones",autor:"Marco Aurelio",generos:["Filosofía"],paginas:null},
-  {titulo:"La República",autor:"Platón",generos:["Filosofía"],paginas:null},
-  {titulo:"Ética nicomáquea",autor:"Aristóteles",generos:["Filosofía"],paginas:null},
-  {titulo:"El origen de las especies",autor:"Charles Darwin",generos:["Biología","Ciencia"],paginas:null},
-  {titulo:"Six easy pieces",autor:"Richard Feynman",generos:["Física"],paginas:null},
-  {titulo:"Lover girl",autor:"Raegan Fordemwalt",generos:["Poesía","Romance"],paginas:null},
-  {titulo:"Los héroes",autor:"Joe Abercrombie",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"La trilogía del mar quebrado",autor:"Joe Abercrombie",generos:["Ficción","Fantasía"],paginas:null},
-  {titulo:"Tiny Experiments",autor:"Anne-Laure",generos:["Productividad"],paginas:null},
-  {titulo:"Confessions of a sociopath",autor:"M.E.Thomas",generos:["Psicología","Memorias"],paginas:null},
-  {titulo:"Pure Invention",autor:"Matt Alt",generos:["Política","Historia"],paginas:null},
-  {titulo:"Morning Star",autor:"Pierce Brown",generos:["Ficción","Fantasía"],paginas:null},
+  
 ];
 
 // ── Supabase hooks ─────────────────────────────────────────────────────────
@@ -598,17 +370,42 @@ function BarRow({d,max,color}) {
 function AleatorioPage({biblioteca,leidos}) {
   const [rec,setRec]=useState(null);const [spinning,setSpinning]=useState(false);
   const [fg,setFg]=useState("");const [autor,setAutor]=useState("");
+  const [yo,setYo]=useState("");const [soloOtro,setSoloOtro]=useState(false);
   const leidosSet=useMemo(()=>new Set(leidos.map(l=>l.titulo?.toLowerCase().trim())),[leidos]);
+  const leidosPorK=useMemo(()=>new Set(leidos.filter(l=>l.lector==="K").map(l=>l.titulo?.toLowerCase().trim())),[leidos]);
+  const leidosPorP=useMemo(()=>new Set(leidos.filter(l=>l.lector==="P").map(l=>l.titulo?.toLowerCase().trim())),[leidos]);
   const autores=useMemo(()=>[...new Set(biblioteca.map(b=>b.autor).filter(Boolean))].sort(),[biblioteca]);
+  const otro=yo==="K"?"P":yo==="P"?"K":null;
+  const leidosPorOtro=otro==="K"?leidosPorK:otro==="P"?leidosPorP:new Set();
   const pool=useMemo(()=>biblioteca.filter(b=>{
-    const nl=!leidosSet.has(b.titulo?.toLowerCase().trim());
+    const titulo=b.titulo?.toLowerCase().trim();
     const mg=!fg||(b.generos&&b.generos.includes(fg));
     const ma=!autor||b.autor===autor;
-    return nl&&mg&&ma;
-  }),[biblioteca,leidosSet,fg,autor]);
+    if(soloOtro&&yo){
+      // Solo libros que el otro ha leído y yo no
+      const yoLeido=yo==="K"?leidosPorK:leidosPorP;
+      return mg&&ma&&leidosPorOtro.has(titulo)&&!yoLeido.has(titulo);
+    }
+    return mg&&ma&&!leidosSet.has(titulo);
+  }),[biblioteca,leidosSet,leidosPorK,leidosPorP,fg,autor,soloOtro,yo]);
   function spin(){if(!pool.length)return;setSpinning(true);setRec(null);setTimeout(()=>{setRec(pool[Math.floor(Math.random()*pool.length)]);setSpinning(false);},700);}
   return <div>
     <SH title="Libro Aleatorio" sub="Déjate sorprender"/>
+    <div style={{ background:C.medCyan,borderRadius:10,padding:14,marginBottom:20 }}>
+      <div style={{ fontSize:11,color:"#8cc",marginBottom:8 }}>¿Quién eres?</div>
+      <div style={{ display:"flex",gap:8,marginBottom:14 }}>
+        {[["","👥 Ambos"],["K","👩 Kiara"],["P","👨 Pablo"]].map(([v,label])=>(
+          <button key={v} onClick={()=>{setYo(v);setSoloOtro(false);setRec(null);}}
+            style={{ padding:"7px 16px",borderRadius:20,border:`1px solid ${yo===v?(v==="K"?C.K:v==="P"?C.P:C.deepCyan):"#1a5a58"}`,background:yo===v?(v==="K"?`${C.K}22`:v==="P"?`${C.P}22`:`${C.deepCyan}22`):"transparent",color:yo===v?(v==="K"?C.K:v==="P"?C.P:C.deepCyan):"#8cc",fontSize:12,cursor:"pointer" }}>
+            {label}
+          </button>
+        ))}
+      </div>
+      {yo&&<label style={{ display:"flex",alignItems:"center",gap:8,fontSize:12,color:"#8cc",cursor:"pointer",marginBottom:4 }}>
+        <input type="checkbox" checked={soloOtro} onChange={e=>setSoloOtro(e.target.checked)} style={{ accentColor:C.deepCyan }}/>
+        Solo libros que {yo==="K"?"Pablo":"Kiara"} ya ha leído (y yo no)
+      </label>}
+    </div>
     <div style={{ display:"flex",gap:8,marginBottom:20,flexWrap:"wrap" }}>
       <select value={fg} onChange={e=>setFg(e.target.value)} style={sS}><option value="">Cualquier género</option>{GENEROS_LIST.map(g=><option key={g}>{g}</option>)}</select>
       <select value={autor} onChange={e=>setAutor(e.target.value)} style={sS}><option value="">Cualquier autor</option>{autores.map(a=><option key={a}>{a}</option>)}</select>
@@ -626,7 +423,7 @@ function AleatorioPage({biblioteca,leidos}) {
       <GenreTags generos={rec.generos}/>
       {rec.paginas&&<div style={{ fontSize:11,color:"#8cc",marginTop:10 }}>{rec.paginas} páginas</div>}
     </div>}
-    {!pool.length&&<div style={{ textAlign:"center",color:"#8cc",padding:24 }}>🎉 ¡No quedan libros sin leer con esos filtros!</div>}
+    {!pool.length&&<div style={{ textAlign:"center",color:"#8cc",padding:24 }}>🎉 ¡No quedan libros con esos filtros!</div>}
   </div>;
 }
 
