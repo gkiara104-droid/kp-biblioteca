@@ -40,7 +40,7 @@ function toDbBiblioteca(obj) {
   return row;
 }
 
-function useSupabaseTable(tableName, seedData, fromDb, toDb) {
+function useTable(tableName, seedData, fromDb, toDb) {
   const [data, setData] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [dbIds, setDbIds] = useState(new Set()); // IDs que existen en DB
@@ -505,7 +505,63 @@ function LeidoFormModal({book,biblioteca,onSave,onClose}) {
 // ── Root ───────────────────────────────────────────────────────────────────
 
 const NAV=[{id:"biblioteca",icon:"📚",label:"Biblioteca"},{id:"leidos",icon:"✅",label:"Leídos"},{id:"estadisticas",icon:"📊",label:"Stats"},{id:"aleatorio",icon:"🎲",label:"Aleatorio"},{id:"comprar",icon:"🛒",label:"Comprar"}];
+function useSupabaseTable(tableName, seedData, fromDb, toDb) {
+  const [data, setData] = useState([]);
+  const [loaded, setLoaded] = useState(false);
 
+  async function reload() {
+    const { data: rows } = await supabase.from(tableName).select('*').order('id');
+    if (rows) setData(rows.map(fromDb));
+    return rows;
+  }
+
+  useEffect(() => {
+    (async () => {
+      const { data: rows } = await supabase.from(tableName).select('*').order('id');
+      if (rows && rows.length === 0 && seedData.length > 0) {
+        for (let i = 0; i < seedData.length; i += 50) {
+          const chunk = seedData.slice(i, i + 50).map(({ id, ...rest }) => rest);
+          await supabase.from(tableName).insert(chunk);
+        }
+        await reload();
+      } else if (rows) {
+        setData(rows.map(fromDb));
+      }
+      setLoaded(true);
+    })();
+  }, []);
+
+  async function save(newArray) {
+    const oldIds = new Set(data.map(x => x.id).filter(Boolean));
+
+    // Borrar eliminados
+    const toDelete = [...oldIds].filter(id => !newArray.find(x => x.id === id));
+    for (const id of toDelete) {
+      await supabase.from(tableName).delete().eq('id', id);
+    }
+
+    // Insertar nuevos
+    const toInsert = newArray.filter(x => !x.id || !oldIds.has(x.id));
+    for (const item of toInsert) {
+      const row = toDb(item);
+      delete row.id;
+      await supabase.from(tableName).insert(row);
+    }
+
+    // Actualizar existentes
+    const toUpdate = newArray.filter(x => x.id && oldIds.has(x.id));
+    for (const item of toUpdate) {
+      const row = toDb(item);
+      const id = row.id;
+      delete row.id;
+      await supabase.from(tableName).update(row).eq('id', id);
+    }
+
+    await reload();
+  }
+
+  return [data, save, loaded];
+}
 export default function App() {
   const [page,setPage]=useState("biblioteca");
   const [leidos,saveLeidos,lL]=useSupabaseTable("leidos",SEED_LEIDOS,fromDbLeido,toDbLeido);
