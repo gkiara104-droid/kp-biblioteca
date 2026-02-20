@@ -37,6 +37,7 @@ function toDbBiblioteca(obj) {
   const { id, ...rest } = obj;
   const row = { ...rest };
   if (id && typeof id === 'number' && id < 2000000000) row.id = id;
+  row.paginas = row.paginas === '' || row.paginas == null ? null : Number(row.paginas);
   return row;
 }
 
