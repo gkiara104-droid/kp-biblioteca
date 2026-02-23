@@ -32,24 +32,11 @@ const GENRE_COLORS = {
 }
 
 const SEED_LEIDOS = [
-  {titulo:'Circe',autor:'Madelline Miller',generos:['Lectura'],formato:'Papel',personaje:9,prosa:8,trama:8,aprendizaje:3,entretenimiento:8.5,total:7.3,mes_leido:'Enero',paginas:448,lector:'P'},
-  {titulo:'Slow productivity',autor:'Cal Newport',generos:['Productividad'],formato:'Ebook',personaje:6,prosa:7,trama:6,aprendizaje:9,entretenimiento:5,total:6.6,mes_leido:'Enero',paginas:256,lector:'P'},
-  {titulo:'The top 5 regrets of the dying',autor:'Bronnie Ware',generos:['Filosofía'],formato:'Ebook',personaje:8,prosa:9,trama:9,aprendizaje:10,entretenimiento:7,total:8.6,mes_leido:'Febrero',paginas:245,lector:'P'},
-  {titulo:'Danzante del filo',autor:'Brandon Sanderson',generos:['Ficción','Fantasía'],formato:'Ebook',personaje:9,prosa:7,trama:10,aprendizaje:4,entretenimiento:10,total:8,mes_leido:'Enero',paginas:150,lector:'P'},
-  {titulo:'Todos nuestros ayeres',autor:'Natalia Ginzburg',generos:['Literatura'],formato:'Ebook',personaje:6,prosa:4,trama:4,aprendizaje:2,entretenimiento:5,total:4.2,mes_leido:'Enero',paginas:150,lector:'P'},
+
 ]
 
 const SEED_BIBLIOTECA = [
-  {titulo:'Sin límites',autor:'Jim Kwik',generos:['Realizamiento']},
-  {titulo:'Start with no',autor:'Jim Camp',generos:['Negocios']},
-  {titulo:'Never eat alone',autor:'Keith Ferrazzi',generos:['Amor y familia']},
-  {titulo:'The minimalist entrepeneur',autor:'Sahil Lavingia',generos:['Negocios']},
-  {titulo:'La caída de Númenor',autor:'J.R.R.Tolkien',generos:['Ficción','Fantasía']},
-  {titulo:'Atrévete a no gustar',autor:'Fumitake Koga',generos:['Autoayuda']},
-  {titulo:'Predictably irrational',autor:'Dan Ariely',generos:['Psicología']},
-  {titulo:'Anything you want',autor:'Derek Sivers',generos:['Negocios']},
-  {titulo:'The 4-hour body',autor:'Tim Ferriss',generos:['Salud']},
-  {titulo:'Miracle morning',autor:'Hal Elrod',generos:['Productividad']},
+ 
 ]
 
 // ─── SUPABASE HOOK ───────────────────────────────────────────────────────────
