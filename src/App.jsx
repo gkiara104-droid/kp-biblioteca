@@ -6,7 +6,7 @@ const GENEROS = [
   'Fantasía','Ficción','Filosofía','Física','Historia','Ingeniería',
   'Lectura','Literatura','Memorias','Negocios','Poesía','Política',
   'Productividad','Psicología','Realizamiento','Research','Romance',
-  'Salud','Work-life balance', 'Mitologia'
+  'Salud','Work-life balance','Mitologia', 'Policiaca' , 'Comedia' 
 ]
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 const FORMATOS = ['Ebook','Papel']
@@ -533,13 +533,14 @@ function BarRow({ d, max, color }) {
   )
 }
 
-function AleatorioPage({ bib, leidos }) {
+function AleatorioPage({ bib, leidos, listaK, listaP }) {
   const [rec, setRec] = useState(null)
   const [spinning, setSpinning] = useState(false)
   const [fg, setFg] = useState('')
   const [autor, setAutor] = useState('')
   const [filterRec, setFilterRec] = useState('')
   const [peso, setPeso] = useState(50)
+  const [quien, setQuien] = useState('ambos') // 'K', 'P', 'ambos'
 
   const leidosSet = useMemo(() => new Set(leidos.rows.map(l => l.titulo?.toLowerCase().trim())), [leidos.rows])
   const autores = useMemo(() => [...new Set(bib.rows.map(b => b.autor).filter(Boolean))].sort(), [bib.rows])
@@ -552,12 +553,28 @@ function AleatorioPage({ bib, leidos }) {
     return nl && mg && ma && mr
   }), [bib.rows, leidosSet, fg, autor, filterRec])
 
+  // Weighted pick using list position
   function weightedPick(books) {
     if (!books.length) return null
     if (peso === 0) return books[Math.floor(Math.random() * books.length)]
-    // Books in lista get boosted — for now use recomendado_por as proxy
-    // (lista drag&drop can be added later)
-    return books[Math.floor(Math.random() * books.length)]
+    const listaUsar = quien === 'K' ? [listaK] : quien === 'P' ? [listaP] : [listaK, listaP]
+    const weighted = books.map(b => {
+      let bestScore = 0
+      listaUsar.forEach(lista => {
+        const pos = lista.indexOf(b.id)
+        if (pos !== -1) {
+          const score = 1 - (pos / Math.max(lista.length, 1))
+          bestScore = Math.max(bestScore, score)
+        }
+      })
+      // blend: peso=0 → all equal (w=1), peso=100 → fully position-driven
+      const w = 1 + bestScore * 3 * (peso / 100)
+      return { book: b, w }
+    })
+    const total = weighted.reduce((s, x) => s + x.w, 0)
+    let r = Math.random() * total
+    for (const { book, w } of weighted) { r -= w; if (r <= 0) return book }
+    return weighted[weighted.length - 1].book
   }
 
   function spin() {
@@ -566,9 +583,34 @@ function AleatorioPage({ bib, leidos }) {
     setTimeout(() => { setRec(weightedPick(pool)); setSpinning(false) }, 700)
   }
 
+  const pesoLabel = peso === 0 ? 'Todos los libros tienen la misma probabilidad.'
+    : peso < 40 ? 'La lista influye poco, aún bastante aleatorio.'
+    : peso < 70 ? 'Equilibrio: los primeros de la lista salen más, pero hay sorpresas.'
+    : 'Los primeros de la lista tienen mucho más peso. Los últimos casi no salen.'
+
+  const listaActiva = quien === 'K' ? listaK : quien === 'P' ? listaP : [...new Set([...listaK, ...listaP])]
+  const getPosLabel = (b) => {
+    const parts = []
+    if (listaK.indexOf(b.id) !== -1) parts.push(`#${listaK.indexOf(b.id)+1} lista K`)
+    if (listaP.indexOf(b.id) !== -1) parts.push(`#${listaP.indexOf(b.id)+1} lista P`)
+    return parts.join(' · ')
+  }
+
   return (
     <div>
       <SH title="Libro Aleatorio" sub="Déjate sorprender"/>
+
+      {/* QUIEN SOY */}
+      <div style={{ display:'flex', gap:8, marginBottom:14, alignItems:'center' }}>
+        <span style={{ fontSize:12, color:C.muted }}>¿Quién eres?</span>
+        {[['K','👩 Kiara',C.K],['P','👨 Pablo',C.P],['ambos','👥 Ambos','#8cc']].map(([v,lbl,col]) => (
+          <button key={v} onClick={() => setQuien(v)}
+            style={{ padding:'6px 16px', borderRadius:20, border:`1px solid ${quien===v?col:C.border}`, background:quien===v?`${col}22`:'transparent', color:quien===v?col:C.muted, fontSize:12, cursor:'pointer' }}>
+            {lbl}
+          </button>
+        ))}
+      </div>
+
       <div style={{ display:'flex', gap:8, marginBottom:12, flexWrap:'wrap' }}>
         <select value={fg} onChange={e => setFg(e.target.value)} style={{ ...sS, width:190 }}>
           <option value="">Cualquier género</option>
@@ -585,6 +627,24 @@ function AleatorioPage({ bib, leidos }) {
         </select>
         <span style={{ color:C.muted, fontSize:11, alignSelf:'center' }}>{pool.length} disponibles</span>
       </div>
+
+      {/* SLIDER PESO */}
+      <div style={{ background:C.surface, borderRadius:10, padding:'14px 16px', marginBottom:20, border:`1px solid ${C.border}` }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+          <span style={{ fontSize:12, color:C.gold, fontWeight:700 }}>⚖️ Peso de la lista de prioridad</span>
+          <span style={{ fontSize:14, color:C.green, fontWeight:900 }}>{peso}%</span>
+        </div>
+        <input type="range" min={0} max={100} step={10} value={peso} onChange={e => setPeso(Number(e.target.value))}
+          style={{ width:'100%', accentColor:C.green }}/>
+        <div style={{ display:'flex', justifyContent:'space-between', fontSize:10, color:'#556', marginTop:4 }}>
+          <span>🎲 100% aleatorio</span>
+          <span>📋 Lista manda</span>
+        </div>
+        <div style={{ fontSize:10, color:'#778', marginTop:6 }}>{pesoLabel}
+          {listaActiva.length === 0 && ' · ⚠️ La lista está vacía, ve a 📋 Lista para ordenar.'}
+        </div>
+      </div>
+
       <div style={{ textAlign:'center', marginBottom:28 }}>
         <button onClick={spin} disabled={!pool.length || spinning}
           style={{ background:pool.length?C.green:'#1a4a48', color:C.bg, border:'none', padding:'16px 52px', borderRadius:30, fontSize:15, fontWeight:900, cursor:pool.length?'pointer':'not-allowed', fontFamily:'inherit', letterSpacing:2, opacity:pool.length?1:0.5 }}>
@@ -597,7 +657,8 @@ function AleatorioPage({ bib, leidos }) {
           <div style={{ fontSize:20, fontWeight:900, color:C.gold, marginBottom:6 }}>{rec.titulo}</div>
           <div style={{ fontSize:13, color:'#aad4d0', marginBottom:12 }}>{rec.autor}</div>
           <GenreTags generos={rec.generos}/>
-          {(rec.recomendado_por||[]).includes('K') && <div style={{ fontSize:11, color:C.K, marginTop:8 }}>💌 Kiara lo recomienda</div>}
+          {getPosLabel(rec) && <div style={{ fontSize:11, color:C.green, marginTop:8, fontWeight:600 }}>📋 {getPosLabel(rec)}</div>}
+          {(rec.recomendado_por||[]).includes('K') && <div style={{ fontSize:11, color:C.K, marginTop:6 }}>💌 Kiara lo recomienda</div>}
           {(rec.recomendado_por||[]).includes('P') && <div style={{ fontSize:11, color:C.P, marginTop:4 }}>💌 Pablo lo recomienda</div>}
           {rec.paginas && <div style={{ fontSize:11, color:C.muted, marginTop:10 }}>{rec.paginas} páginas</div>}
         </div>
@@ -943,7 +1004,7 @@ export default function App() {
           {page === 'leidos'       && <LeidosPage leidos={leidos} bib={bib}/>}
           {page === 'lista'        && <ListaPage bib={bib} leidos={leidos} listaK={listaK} saveListaK={saveListaK} listaP={listaP} saveListaP={saveListaP}/>}
           {page === 'estadisticas' && <EstadisticasPage leidos={leidos}/>}
-          {page === 'aleatorio'    && <AleatorioPage bib={bib} leidos={leidos}/>}
+          {page === 'aleatorio'    && <AleatorioPage bib={bib} leidos={leidos} listaK={listaK} listaP={listaP}/>}
           {page === 'comprar'      && <ComprarPage leidos={leidos}/>}
         </div>
       </div>
