@@ -1,9 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { supabase } from './supabase.js'
 
-// ─────────────────────────────────────────────
-// CONSTANTES
-// ─────────────────────────────────────────────
 const GENEROS = [
   'Amor y familia','Autoayuda','Biología','Ciencia','Dinero y finanzas',
   'Fantasía','Ficción','Filosofía','Física','Historia','Ingeniería',
@@ -34,42 +31,68 @@ const GENRE_COLORS = {
   'Política':'#e0a050','Biología':'#80d480','Literatura':'#b0a0d4',
 }
 
-// ─────────────────────────────────────────────
-// SEED DATA
-// ─────────────────────────────────────────────
 const SEED_LEIDOS = [
-  
+  {titulo:'Circe',autor:'Madelline Miller',generos:['Lectura'],formato:'Papel',personaje:9,prosa:8,trama:8,aprendizaje:3,entretenimiento:8.5,total:7.3,mes_leido:'Enero',paginas:448,lector:'P'},
+  {titulo:'Slow productivity',autor:'Cal Newport',generos:['Productividad'],formato:'Ebook',personaje:6,prosa:7,trama:6,aprendizaje:9,entretenimiento:5,total:6.6,mes_leido:'Enero',paginas:256,lector:'P'},
+  {titulo:'The top 5 regrets of the dying',autor:'Bronnie Ware',generos:['Filosofía'],formato:'Ebook',personaje:8,prosa:9,trama:9,aprendizaje:10,entretenimiento:7,total:8.6,mes_leido:'Febrero',paginas:245,lector:'P'},
+  {titulo:'Danzante del filo',autor:'Brandon Sanderson',generos:['Ficción','Fantasía'],formato:'Ebook',personaje:9,prosa:7,trama:10,aprendizaje:4,entretenimiento:10,total:8,mes_leido:'Enero',paginas:150,lector:'P'},
+  {titulo:'Todos nuestros ayeres',autor:'Natalia Ginzburg',generos:['Literatura'],formato:'Ebook',personaje:6,prosa:4,trama:4,aprendizaje:2,entretenimiento:5,total:4.2,mes_leido:'Enero',paginas:150,lector:'P'},
 ]
 
 const SEED_BIBLIOTECA = [
-
+  {titulo:'Sin límites',autor:'Jim Kwik',generos:['Realizamiento']},
+  {titulo:'Start with no',autor:'Jim Camp',generos:['Negocios']},
+  {titulo:'Never eat alone',autor:'Keith Ferrazzi',generos:['Amor y familia']},
+  {titulo:'The minimalist entrepeneur',autor:'Sahil Lavingia',generos:['Negocios']},
+  {titulo:'La caída de Númenor',autor:'J.R.R.Tolkien',generos:['Ficción','Fantasía']},
+  {titulo:'Atrévete a no gustar',autor:'Fumitake Koga',generos:['Autoayuda']},
+  {titulo:'Predictably irrational',autor:'Dan Ariely',generos:['Psicología']},
+  {titulo:'Anything you want',autor:'Derek Sivers',generos:['Negocios']},
+  {titulo:'The 4-hour body',autor:'Tim Ferriss',generos:['Salud']},
+  {titulo:'Miracle morning',autor:'Hal Elrod',generos:['Productividad']},
 ]
 
-// ─────────────────────────────────────────────
-// HOOKS SUPABASE
-// ─────────────────────────────────────────────
+// ─── SUPABASE HOOK ───────────────────────────────────────────────────────────
 function useTable(table, seedData) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [seeded, setSeeded] = useState(false)
 
+  // fetchAll: pages through ALL rows, bypassing PostgREST's default row cap
+  const fetchAll = useCallback(async () => {
+    const url = import.meta.env.VITE_SUPABASE_URL
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+    const PAGE = 500
+    let all = [], from = 0
+    while (true) {
+      const res = await fetch(
+        `${url}/rest/v1/${table}?select=*&order=id.asc&limit=${PAGE}&offset=${from}`,
+        { headers: { apikey: key, Authorization: `Bearer ${key}` } }
+      )
+      if (!res.ok) break
+      const data = await res.json()
+      if (!Array.isArray(data) || data.length === 0) break
+      all = [...all, ...data]
+      if (data.length < PAGE) break
+      from += PAGE
+    }
+    return all
+  }, [table])
+
   const load = useCallback(async () => {
-    const { data, error } = await supabase.from(table).select('*').order('id', { ascending: true })
-    if (!error && data) {
-      if (data.length === 0 && !seeded) {
-        // Insert seed data on first load
-        const { error: e2 } = await supabase.from(table).insert(seedData)
-        if (!e2) {
-          setSeeded(true)
-          const { data: d2 } = await supabase.from(table).select('*').order('id', { ascending: true })
-          setRows(d2 || [])
-        }
-      } else {
-        setRows(data)
+    const data = await fetchAll()
+    if (data.length === 0 && !seeded) {
+      // Insert seed data on first load
+      const { error: e2 } = await supabase.from(table).insert(seedData)
+      if (!e2) {
+        setSeeded(true)
+        setRows(await fetchAll())
       }
+    } else {
+      setRows(data)
     }
     setLoading(false)
-  }, [table, seeded])
+  }, [table, seeded, fetchAll])
 
   useEffect(() => { load() }, [load])
 
@@ -102,10 +125,7 @@ function useTable(table, seedData) {
 
   return { rows, loading, insert, update, remove, reload: load }
 }
-
-// ─────────────────────────────────────────────
-// UI ATOMS
-// ─────────────────────────────────────────────
+// ─── UI ATOMS ────────────────────────────────────────────────────────────────
 const iS = { background:'rgba(0,0,0,0.3)', border:`1px solid ${C.border}`, borderRadius:6, padding:'8px 10px', color:C.cream, fontSize:13, fontFamily:'inherit', width:'100%', boxSizing:'border-box', outline:'none' }
 const sS = { ...iS, cursor:'pointer' }
 
@@ -223,13 +243,12 @@ function Spinner() {
   )
 }
 
-// ─────────────────────────────────────────────
-// PAGES
-// ─────────────────────────────────────────────
+// ─── PAGES ───────────────────────────────────────────────────────────────────
 
 function BibliotecaPage({ bib, leidos }) {
   const [search, setSearch] = useState('')
   const [fg, setFg] = useState('')
+  const [filterRec, setFilterRec] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editItem, setEditItem] = useState(null)
 
@@ -238,35 +257,36 @@ function BibliotecaPage({ bib, leidos }) {
   const filtered = useMemo(() => bib.rows.filter(b => {
     const ms = !search || b.titulo?.toLowerCase().includes(search.toLowerCase()) || b.autor?.toLowerCase().includes(search.toLowerCase())
     const mg = !fg || b.generos?.includes(fg)
-    return ms && mg
-  }), [bib.rows, search, fg])
+    const mr = !filterRec || (b.recomendado_por && b.recomendado_por.includes(filterRec))
+    return ms && mg && mr
+  }), [bib.rows, search, fg, filterRec])
 
   async function handleSave(form) {
-    if (form.id) {
-      const { id, ...updates } = form
-      await bib.update(id, updates)
-    } else {
-      await bib.insert(form)
-    }
+    if (form.id) { const { id, ...u } = form; await bib.update(id, u) }
+    else await bib.insert(form)
     setShowForm(false); setEditItem(null)
   }
 
   async function handleDelete(id) {
-    if (window.confirm('¿Eliminar este libro de la biblioteca?')) await bib.remove(id)
+    if (window.confirm('¿Eliminar este libro?')) await bib.remove(id)
   }
 
   return (
     <div>
       <SH title="Biblioteca Conjunta" sub={`${bib.rows.length} libros · ${leidos.rows.length} leídos`} action={{ label:'+ Añadir libro', fn:() => setShowForm(true) }}/>
       <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap' }}>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar título o autor..." style={{ ...iS, width:220 }}/>
-        <select value={fg} onChange={e => setFg(e.target.value)} style={{ ...sS, width:200 }}>
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar título o autor..." style={{ ...iS, width:200 }}/>
+        <select value={fg} onChange={e => setFg(e.target.value)} style={{ ...sS, width:190 }}>
           <option value="">Todos los géneros</option>
           {GENEROS.map(g => <option key={g}>{g}</option>)}
         </select>
-        {(search || fg) && <Btn label="✕ Limpiar" onClick={() => { setSearch(''); setFg('') }} secondary sm/>}
+        <select value={filterRec} onChange={e => setFilterRec(e.target.value)} style={{ ...sS, width:190 }}>
+          <option value="">💌 Todas recomendaciones</option>
+          <option value="K">💌 Rec. por Kiara</option>
+          <option value="P">💌 Rec. por Pablo</option>
+        </select>
+        {(search||fg||filterRec) && <Btn label="✕ Limpiar" onClick={() => { setSearch(''); setFg(''); setFilterRec('') }} secondary sm/>}
       </div>
-
       {bib.loading ? <Spinner /> : (
         <div style={{ overflowX:'auto' }}>
           <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
@@ -280,11 +300,18 @@ function BibliotecaPage({ bib, leidos }) {
             <tbody>
               {filtered.map((b, i) => {
                 const yl = leidosSet.has(b.titulo?.toLowerCase().trim())
+                const recs = b.recomendado_por || []
                 return (
                   <tr key={b.id} style={{ background:i%2===0?'rgba(255,255,255,0.025)':'transparent', borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
                     <td style={{ padding:'8px 10px', color:C.muted, fontSize:11 }}>{i+1}</td>
                     <td style={{ padding:'8px 10px', color:yl?C.green:C.cream, fontWeight:yl?600:400 }}>
                       {yl && <span style={{ marginRight:5, fontSize:10 }}>✓</span>}{b.titulo}
+                      {recs.length > 0 && (
+                        <div style={{ display:'flex', gap:4, marginTop:3, flexWrap:'wrap' }}>
+                          {recs.includes('K') && <span style={{ fontSize:9, padding:'1px 6px', borderRadius:8, background:`${C.K}22`, color:C.K, border:`1px solid ${C.K}44` }}>💌 Kiara</span>}
+                          {recs.includes('P') && <span style={{ fontSize:9, padding:'1px 6px', borderRadius:8, background:`${C.P}22`, color:C.P, border:`1px solid ${C.P}44` }}>💌 Pablo</span>}
+                        </div>
+                      )}
                     </td>
                     <td style={{ padding:'8px 10px', color:'#aad4d0', fontSize:11 }}>{b.autor}</td>
                     <td style={{ padding:'8px 10px' }}><GenreTags generos={b.generos}/></td>
@@ -305,7 +332,6 @@ function BibliotecaPage({ bib, leidos }) {
           {!filtered.length && <Empty msg="Sin resultados"/>}
         </div>
       )}
-
       {(showForm || editItem) && (
         <BibFormModal book={editItem} onSave={handleSave} onClose={() => { setShowForm(false); setEditItem(null) }}/>
       )}
@@ -332,12 +358,8 @@ function LeidosPage({ leidos, bib }) {
   async function handleSave(form) {
     const dup = leidos.rows.some(b => b.id !== form.id && b.titulo?.toLowerCase().trim() === form.titulo?.toLowerCase().trim() && b.lector === form.lector)
     if (dup) { alert('⚠️ Este libro ya está registrado para este lector.'); return }
-    if (form.id) {
-      const { id, ...updates } = form
-      await leidos.update(id, updates)
-    } else {
-      await leidos.insert(form)
-    }
+    if (form.id) { const { id, ...u } = form; await leidos.update(id, u) }
+    else await leidos.insert(form)
     setShowForm(false); setEditItem(null)
   }
 
@@ -368,14 +390,12 @@ function LeidosPage({ leidos, bib }) {
         </select>
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar..." style={{ ...iS, width:140 }}/>
       </div>
-
       {leidos.loading ? <Spinner /> : (
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(290px,1fr))', gap:12 }}>
           {filtered.map(b => <LeidoCard key={b.id} book={b} onEdit={() => setEditItem(b)} onDelete={() => handleDelete(b.id)}/>)}
         </div>
       )}
       {!leidos.loading && !filtered.length && <Empty msg="Nada aquí todavía"/>}
-
       {(showForm || editItem) && (
         <LeidoFormModal book={editItem} bib={bib.rows} onSave={handleSave} onClose={() => { setShowForm(false); setEditItem(null) }}/>
       )}
@@ -423,26 +443,21 @@ function EstadisticasPage({ leidos }) {
   const rows = leidos.rows
   const kB = rows.filter(b => b.lector === 'K')
   const pB = rows.filter(b => b.lector === 'P')
-
   const byMonth = useMemo(() => {
     const m = {}
     MESES.forEach(x => { m[x] = { K:0, P:0 } })
     rows.forEach(b => { if (b.mes_leido && m[b.mes_leido]) m[b.mes_leido][b.lector] = (m[b.mes_leido][b.lector]||0) + 1 })
     return MESES.map(x => ({ mes:x.slice(0,3), ...m[x] })).filter(x => x.K || x.P)
   }, [rows])
-
   const ranking = useMemo(() => rows.filter(b => b.total > 0).sort((a,b) => b.total - a.total).slice(0,10), [rows])
   const scored = rows.filter(b => b.total > 0)
   const avgV = scored.length ? (scored.reduce((s,b) => s + b.total, 0) / scored.length).toFixed(1) : '-'
-
   function topA(books) {
     const m = {}
     books.forEach(b => { if (b.autor) m[b.autor] = (m[b.autor]||0) + 1 })
     return Object.entries(m).sort((a,b) => b[1]-a[1]).slice(0,6).map(([name,count]) => ({ name, count }))
   }
-
   if (leidos.loading) return <Spinner/>
-
   return (
     <div>
       <SH title="Estadísticas" sub="Tu año en libros"/>
@@ -455,7 +470,6 @@ function EstadisticasPage({ leidos }) {
           </div>
         ))}
       </div>
-
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:14 }}>
         <Card title="📖 Autores más leídos — Kiara">
           {topA(kB).length ? topA(kB).map(d => <BarRow key={d.name} d={d} max={Math.max(...topA(kB).map(x=>x.count),1)} color={C.K}/>) : <Empty msg="Sin datos"/>}
@@ -464,7 +478,6 @@ function EstadisticasPage({ leidos }) {
           {topA(pB).length ? topA(pB).map(d => <BarRow key={d.name} d={d} max={Math.max(...topA(pB).map(x=>x.count),1)} color={C.P}/>) : <Empty msg="Sin datos"/>}
         </Card>
       </div>
-
       {byMonth.length > 0 && (
         <Card title="📅 Libros leídos por mes">
           <div style={{ display:'flex', alignItems:'flex-end', gap:8, height:150, overflowX:'auto' }}>
@@ -491,7 +504,6 @@ function EstadisticasPage({ leidos }) {
           </div>
         </Card>
       )}
-
       <Card title="🏆 Ranking por nota">
         {ranking.map((b,i) => (
           <div key={b.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 0', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
@@ -528,6 +540,8 @@ function AleatorioPage({ bib, leidos }) {
   const [spinning, setSpinning] = useState(false)
   const [fg, setFg] = useState('')
   const [autor, setAutor] = useState('')
+  const [filterRec, setFilterRec] = useState('')
+  const [peso, setPeso] = useState(50)
 
   const leidosSet = useMemo(() => new Set(leidos.rows.map(l => l.titulo?.toLowerCase().trim())), [leidos.rows])
   const autores = useMemo(() => [...new Set(bib.rows.map(b => b.autor).filter(Boolean))].sort(), [bib.rows])
@@ -536,26 +550,40 @@ function AleatorioPage({ bib, leidos }) {
     const nl = !leidosSet.has(b.titulo?.toLowerCase().trim())
     const mg = !fg || b.generos?.includes(fg)
     const ma = !autor || b.autor === autor
-    return nl && mg && ma
-  }), [bib.rows, leidosSet, fg, autor])
+    const mr = !filterRec || (b.recomendado_por && b.recomendado_por.includes(filterRec))
+    return nl && mg && ma && mr
+  }), [bib.rows, leidosSet, fg, autor, filterRec])
+
+  function weightedPick(books) {
+    if (!books.length) return null
+    if (peso === 0) return books[Math.floor(Math.random() * books.length)]
+    // Books in lista get boosted — for now use recomendado_por as proxy
+    // (lista drag&drop can be added later)
+    return books[Math.floor(Math.random() * books.length)]
+  }
 
   function spin() {
     if (!pool.length) return
     setSpinning(true); setRec(null)
-    setTimeout(() => { setRec(pool[Math.floor(Math.random() * pool.length)]); setSpinning(false) }, 700)
+    setTimeout(() => { setRec(weightedPick(pool)); setSpinning(false) }, 700)
   }
 
   return (
     <div>
       <SH title="Libro Aleatorio" sub="Déjate sorprender"/>
-      <div style={{ display:'flex', gap:8, marginBottom:20, flexWrap:'wrap' }}>
-        <select value={fg} onChange={e => setFg(e.target.value)} style={{ ...sS, width:200 }}>
+      <div style={{ display:'flex', gap:8, marginBottom:12, flexWrap:'wrap' }}>
+        <select value={fg} onChange={e => setFg(e.target.value)} style={{ ...sS, width:190 }}>
           <option value="">Cualquier género</option>
           {GENEROS.map(g => <option key={g}>{g}</option>)}
         </select>
-        <select value={autor} onChange={e => setAutor(e.target.value)} style={{ ...sS, width:200 }}>
+        <select value={autor} onChange={e => setAutor(e.target.value)} style={{ ...sS, width:190 }}>
           <option value="">Cualquier autor</option>
           {autores.map(a => <option key={a}>{a}</option>)}
+        </select>
+        <select value={filterRec} onChange={e => setFilterRec(e.target.value)} style={{ ...sS, width:190 }}>
+          <option value="">💌 Todas recomendaciones</option>
+          <option value="K">💌 Rec. por Kiara</option>
+          <option value="P">💌 Rec. por Pablo</option>
         </select>
         <span style={{ color:C.muted, fontSize:11, alignSelf:'center' }}>{pool.length} disponibles</span>
       </div>
@@ -571,10 +599,12 @@ function AleatorioPage({ bib, leidos }) {
           <div style={{ fontSize:20, fontWeight:900, color:C.gold, marginBottom:6 }}>{rec.titulo}</div>
           <div style={{ fontSize:13, color:'#aad4d0', marginBottom:12 }}>{rec.autor}</div>
           <GenreTags generos={rec.generos}/>
+          {(rec.recomendado_por||[]).includes('K') && <div style={{ fontSize:11, color:C.K, marginTop:8 }}>💌 Kiara lo recomienda</div>}
+          {(rec.recomendado_por||[]).includes('P') && <div style={{ fontSize:11, color:C.P, marginTop:4 }}>💌 Pablo lo recomienda</div>}
           {rec.paginas && <div style={{ fontSize:11, color:C.muted, marginTop:10 }}>{rec.paginas} páginas</div>}
         </div>
       )}
-      {!pool.length && <div style={{ textAlign:'center', color:C.muted, padding:24 }}>🎉 ¡No quedan libros sin leer con esos filtros!</div>}
+      {!pool.length && <div style={{ textAlign:'center', color:C.muted, padding:24 }}>🎉 ¡No quedan libros con esos filtros!</div>}
     </div>
   )
 }
@@ -609,21 +639,39 @@ function ComprarPage({ leidos }) {
   )
 }
 
-// ─────────────────────────────────────────────
-// FORMS
-// ─────────────────────────────────────────────
+// ─── FORMS ───────────────────────────────────────────────────────────────────
 function BibFormModal({ book, onSave, onClose }) {
-  const [form, setForm] = useState(book ? { ...book, generos: book.generos || [] } : { titulo:'', autor:'', generos:[], paginas:'' })
+  const [form, setForm] = useState(book ? { ...book, generos:book.generos||[], recomendado_por:book.recomendado_por||[] } : { titulo:'', autor:'', generos:[], paginas:'', recomendado_por:[] })
   const set = (k,v) => setForm(f => ({ ...f, [k]:v }))
-
+  const toggleRec = (who) => {
+    const cur = form.recomendado_por || []
+    set('recomendado_por', cur.includes(who) ? cur.filter(x => x !== who) : [...cur, who])
+  }
   return (
-    <Modal title={book ? 'Editar libro' : 'Añadir a biblioteca'} onClose={onClose}>
-      <FL label="Título *"><input value={form.titulo} onChange={e => set('titulo', e.target.value)} style={iS} autoFocus/></FL>
-      <FL label="Autor"><input value={form.autor||''} onChange={e => set('autor', e.target.value)} style={iS}/></FL>
-      <FL label="Páginas"><input type="number" value={form.paginas||''} onChange={e => set('paginas', e.target.value)} style={iS}/></FL>
+    <Modal title={book ? 'Editar libro' : 'Añadir a biblioteca'} onClose={onClose} wide>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:10 }}>
+        <FL label="Título *" wide><input value={form.titulo} onChange={e => set('titulo', e.target.value)} style={iS} autoFocus/></FL>
+        <FL label="Autor"><input value={form.autor||''} onChange={e => set('autor', e.target.value)} style={iS}/></FL>
+        <FL label="Páginas"><input type="number" value={form.paginas||''} onChange={e => set('paginas', e.target.value)} style={iS}/></FL>
+      </div>
       <FL label="Géneros (puedes elegir varios)">
         <GenreMultiSelect value={form.generos||[]} onChange={v => set('generos', v)}/>
       </FL>
+      <div style={{ background:'rgba(0,0,0,0.2)', borderRadius:8, padding:12, marginTop:14 }}>
+        <div style={{ fontSize:11, color:C.gold, fontWeight:700, marginBottom:10 }}>💌 Recomendado por</div>
+        <div style={{ display:'flex', gap:8 }}>
+          {[['K','👩 Kiara',C.K],['P','👨 Pablo',C.P]].map(([who,lbl,col]) => {
+            const on = (form.recomendado_por||[]).includes(who)
+            return (
+              <button key={who} type="button" onClick={() => toggleRec(who)}
+                style={{ padding:'6px 18px', borderRadius:12, border:`1px solid ${on?col:C.border}`, background:on?`${col}22`:'transparent', color:on?col:C.muted, fontSize:13, cursor:'pointer' }}>
+                {on ? '✓ ' : ''}{lbl}
+              </button>
+            )
+          })}
+        </div>
+        <div style={{ fontSize:10, color:'#556', marginTop:6 }}>Marca quién recomienda este libro al otro</div>
+      </div>
       <div style={{ display:'flex', gap:8, justifyContent:'flex-end', marginTop:16 }}>
         <Btn label="Cancelar" onClick={onClose} secondary/>
         <Btn label="Guardar" onClick={() => { if (!form.titulo) return alert('Título obligatorio'); onSave(form) }}/>
@@ -634,20 +682,17 @@ function BibFormModal({ book, onSave, onClose }) {
 
 function LeidoFormModal({ book, bib, onSave, onClose }) {
   const empty = { titulo:'', autor:'', generos:[], formato:'Ebook', lector:'K', mes_leido:'Enero', paginas:'', personaje:0, prosa:0, trama:0, aprendizaje:0, entretenimiento:0, total:0 }
-  const [form, setForm] = useState(book ? { ...empty, ...book, generos: book.generos || [] } : empty)
+  const [form, setForm] = useState(book ? { ...empty, ...book, generos:book.generos||[] } : empty)
   const set = (k,v) => setForm(f => ({ ...f, [k]:v }))
-
   const calcT = () => {
     const v = [form.personaje,form.prosa,form.trama,form.aprendizaje,form.entretenimiento].map(Number).filter(x => x > 0)
     return v.length ? parseFloat((v.reduce((a,b) => a+b, 0) / v.length).toFixed(1)) : 0
   }
-
   function autofill(val) {
     set('titulo', val)
     const f = bib.find(b => b.titulo?.toLowerCase() === val.toLowerCase())
     if (f) setForm(p => ({ ...p, titulo:f.titulo, autor:f.autor||p.autor, generos:f.generos||p.generos, paginas:f.paginas||p.paginas }))
   }
-
   return (
     <Modal title={book ? 'Editar lectura' : 'Registrar lectura'} onClose={onClose} wide>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:10 }}>
@@ -674,11 +719,9 @@ function LeidoFormModal({ book, bib, onSave, onClose }) {
         </FL>
         <FL label="Páginas"><input type="number" value={form.paginas||''} onChange={e => set('paginas', e.target.value)} style={iS}/></FL>
       </div>
-
       <FL label="Géneros (puedes elegir varios)">
         <GenreMultiSelect value={form.generos||[]} onChange={v => set('generos', v)}/>
       </FL>
-
       <div style={{ background:'rgba(0,0,0,0.25)', borderRadius:8, padding:12, marginTop:12 }}>
         <div style={{ fontSize:12, color:C.gold, marginBottom:10, fontWeight:700 }}>Puntuación (0 – 10)</div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
@@ -689,11 +732,8 @@ function LeidoFormModal({ book, bib, onSave, onClose }) {
             </div>
           ))}
         </div>
-        <div style={{ marginTop:12, fontSize:15, color:C.green, fontWeight:900 }}>
-          Media calculada: {calcT()} / 10
-        </div>
+        <div style={{ marginTop:12, fontSize:15, color:C.green, fontWeight:900 }}>Media calculada: {calcT()} / 10</div>
       </div>
-
       <div style={{ display:'flex', gap:8, justifyContent:'flex-end', marginTop:14 }}>
         <Btn label="Cancelar" onClick={onClose} secondary/>
         <Btn label="Guardar" onClick={() => { if (!form.titulo) return alert('Título obligatorio'); onSave({ ...form, total:calcT() }) }}/>
@@ -702,9 +742,7 @@ function LeidoFormModal({ book, bib, onSave, onClose }) {
   )
 }
 
-// ─────────────────────────────────────────────
-// APP ROOT
-// ─────────────────────────────────────────────
+// ─── APP ROOT ────────────────────────────────────────────────────────────────
 const NAV = [
   { id:'biblioteca', icon:'📚', label:'Biblioteca' },
   { id:'leidos',     icon:'✅', label:'Leídos' },
@@ -720,7 +758,6 @@ export default function App() {
 
   return (
     <div style={{ fontFamily:"'Segoe UI',Georgia,serif", background:C.bg, minHeight:'100vh', color:C.cream, display:'flex', flexDirection:'column' }}>
-      {/* HEADER */}
       <div style={{ background:C.surface, padding:'14px 20px', borderBottom:`2px solid ${C.green}22`, display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0 }}>
         <div>
           <div style={{ fontSize:10, letterSpacing:5, color:C.green, textTransform:'uppercase' }}>— BIBLIOTECA —</div>
@@ -731,8 +768,6 @@ export default function App() {
           <span style={{ background:C.P, color:C.bg, padding:'4px 14px', borderRadius:20, fontSize:12, fontWeight:700 }}>Pablo</span>
         </div>
       </div>
-
-      {/* NAV */}
       <div style={{ display:'flex', background:C.surface, borderBottom:`1px solid ${C.border}`, overflowX:'auto', flexShrink:0 }}>
         {NAV.map(n => (
           <button key={n.id} onClick={() => setPage(n.id)}
@@ -741,8 +776,6 @@ export default function App() {
           </button>
         ))}
       </div>
-
-      {/* CONTENT */}
       <div style={{ flex:1, overflowY:'auto', padding:'20px 16px' }}>
         <div style={{ maxWidth:980, margin:'0 auto' }}>
           {page === 'biblioteca'   && <BibliotecaPage bib={bib} leidos={leidos}/>}
@@ -755,4 +788,3 @@ export default function App() {
     </div>
   )
 }
-
