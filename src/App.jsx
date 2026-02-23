@@ -9,7 +9,7 @@ const GENEROS = [
   'Fantasía','Ficción','Filosofía','Física','Historia','Ingeniería',
   'Lectura','Literatura','Memorias','Negocios','Poesía','Política',
   'Productividad','Psicología','Realizamiento','Research','Romance',
-  'Salud','Work-life balance', 'Mitología'
+  'Salud','Work-life balance'
 ]
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 const FORMATOS = ['Ebook','Papel']
@@ -38,9 +38,233 @@ const GENRE_COLORS = {
 // SEED DATA
 // ─────────────────────────────────────────────
 const SEED_LEIDOS = [
- ]
+  {titulo:'Circe',autor:'Madelline Miller',generos:['Lectura'],formato:'Papel',personaje:9,prosa:8,trama:8,aprendizaje:3,entretenimiento:8.5,total:7.3,mes_leido:'Enero',paginas:448,lector:'P'},
+  {titulo:'Slow productivity',autor:'Cal Newport',generos:['Productividad'],formato:'Ebook',personaje:6,prosa:7,trama:6,aprendizaje:9,entretenimiento:5,total:6.6,mes_leido:'Enero',paginas:256,lector:'P'},
+  {titulo:'The top 5 regrets of the dying',autor:'Bronnie Ware',generos:['Filosofía'],formato:'Ebook',personaje:8,prosa:9,trama:9,aprendizaje:10,entretenimiento:7,total:8.6,mes_leido:'Febrero',paginas:245,lector:'P'},
+  {titulo:'Danzante del filo',autor:'Brandon Sanderson',generos:['Ficción','Fantasía'],formato:'Ebook',personaje:9,prosa:7,trama:10,aprendizaje:4,entretenimiento:10,total:8,mes_leido:'Enero',paginas:150,lector:'P'},
+  {titulo:'Todos nuestros ayeres',autor:'Natalia Ginzburg',generos:['Literatura'],formato:'Ebook',personaje:6,prosa:4,trama:4,aprendizaje:2,entretenimiento:5,total:4.2,mes_leido:'Enero',paginas:150,lector:'P'},
+]
 
 const SEED_BIBLIOTECA = [
+  {titulo:'Sin límites',autor:'Jim Kwik',generos:['Realizamiento']},
+  {titulo:'Start with no',autor:'Jim Camp',generos:['Negocios']},
+  {titulo:'Never eat alone',autor:'Keith Ferrazzi',generos:['Amor y familia']},
+  {titulo:'The minimalist entrepeneur',autor:'Sahil Lavingia',generos:['Negocios']},
+  {titulo:'La caída de Númenor',autor:'J.R.R.Tolkien',generos:['Ficción','Fantasía']},
+  {titulo:'Atrévete a no gustar',autor:'Fumitake Koga',generos:['Autoayuda']},
+  {titulo:'Predictably irrational',autor:'Dan Ariely',generos:['Psicología']},
+  {titulo:'Anything you want',autor:'Derek Sivers',generos:['Negocios']},
+  {titulo:'The 4-hour body',autor:'Tim Ferriss',generos:['Salud']},
+  {titulo:'Miracle morning',autor:'Hal Elrod',generos:['Productividad']},
+  {titulo:'The science of getting rich',autor:'Wallace Wattles',generos:['Dinero y finanzas']},
+  {titulo:'Work Rules!',autor:'Lazslo Bock',generos:['Negocios']},
+  {titulo:'I will teach you to be rich',autor:'Ramt Sethi',generos:['Dinero y finanzas']},
+  {titulo:'Closer to love',autor:'Vex King',generos:['Amor y familia']},
+  {titulo:'De cero a uno',autor:'Peter Thiel',generos:['Negocios']},
+  {titulo:'Women don\'t own you pretty',autor:'Florence Given',generos:['Política']},
+  {titulo:'Think and grow rich',autor:'Napoleon Hill',generos:['Dinero y finanzas']},
+  {titulo:'The 7 habits of high effective people',autor:'Stephen Covey',generos:['Productividad']},
+  {titulo:'Think big',autor:'Dr. Grace Lordan',generos:['Autoayuda']},
+  {titulo:'El arte de pensar',autor:'Rolf Dobelli',generos:['Realizamiento']},
+  {titulo:'The courage to be',autor:'Paul Tillich',generos:['Filosofía']},
+  {titulo:'The untethered soul',autor:'Michael Singer',generos:['Filosofía']},
+  {titulo:'Why has no one told me this before',autor:'Jordan Peterson',generos:['Autoayuda']},
+  {titulo:'La montaña eres tú',autor:'Brianna Wiest',generos:['Autoayuda']},
+  {titulo:'Radical Candor',autor:'Kim Scott',generos:['Negocios']},
+  {titulo:'El aliento de los dioses',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'Steal like an artist',autor:'Austin Kleon',generos:['Psicología']},
+  {titulo:'Pensar deprisa, pensar despacio',autor:'Daniel Kahnemann',generos:['Psicología','Productividad']},
+  {titulo:'El poder de los hábitos',autor:'Charles Duhigg',generos:['Productividad']},
+  {titulo:'Rich dad, poor dad',autor:'Robert Kiyosaki',generos:['Dinero y finanzas']},
+  {titulo:'Lost connections',autor:'Johann Harri',generos:['Salud']},
+  {titulo:'22 inmutable laws of marketing',autor:'Ries and Trout',generos:['Negocios']},
+  {titulo:'Decisive',autor:'Chip and Dan Heath',generos:['Work-life balance']},
+  {titulo:'The psychology of money',autor:'Morgan Housel',generos:['Dinero y finanzas']},
+  {titulo:'Mating in captivity',autor:'Esther Perel',generos:['Amor y familia']},
+  {titulo:'Obtenga el sí',autor:'Roger Fisher',generos:['Negocios']},
+  {titulo:'Invisible woman',autor:'Caroline Criado',generos:['Amor y familia','Política']},
+  {titulo:'El héroe de las eras',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'No hay partes malas',autor:'Richard Swortz',generos:['Psicología']},
+  {titulo:'Conversaciones difíciles',autor:'Douglas Stone',generos:['Amor y familia']},
+  {titulo:'Things you can see when you slow down',autor:'Haemin Sumin',generos:['Realizamiento']},
+  {titulo:'The subtle art of not giving a fuck',autor:'Mark Manson',generos:['Realizamiento']},
+  {titulo:'Think again',autor:'Adam Grant',generos:['Psicología']},
+  {titulo:'El metal perdido',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'Donde viven las musas',autor:'Marianela dos Santos',generos:['Poesía']},
+  {titulo:'Far from the tree',autor:'Andrew Solomon',generos:['Amor y familia']},
+  {titulo:'Bounce',autor:'Matthew Syed',generos:['Psicología']},
+  {titulo:'Black Box Thinking',autor:'Matthew Syed',generos:['Negocios']},
+  {titulo:'Come as you are',autor:'Emily Nagoski',generos:['Amor y familia','Salud']},
+  {titulo:'The Antidote',autor:'Oliver Burkeman',generos:['Realizamiento']},
+  {titulo:'Generación dopamina',autor:'Anna Lembke',generos:['Psicología']},
+  {titulo:'Mindset',autor:'Carol Dweck',generos:['Psicología']},
+  {titulo:'Made to stick',autor:'Chip y Dan Heath',generos:['Work-life balance','Negocios']},
+  {titulo:'Eat that frog',autor:'Brian Tracey',generos:['Productividad']},
+  {titulo:'Quiet',autor:'Susan Cain',generos:['Psicología']},
+  {titulo:'La bolsa o la vida',autor:'Joe Dominguez',generos:['Dinero y finanzas']},
+  {titulo:'The Silmarillion',autor:'J.R.R.Tolkien',generos:['Ficción','Fantasía']},
+  {titulo:'Traction',autor:'Gino Wickman',generos:['Negocios']},
+  {titulo:'Camino de reyes',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'Lifespan',autor:'David Sinclair',generos:['Salud']},
+  {titulo:'Buenos hábitos',autor:'Fumio Sasaki',generos:['Autoayuda']},
+  {titulo:'Proyecto Hail Mary',autor:'Andy Weir',generos:['Ficción','Ciencia']},
+  {titulo:'Esquirla del amanecer',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'Lo que nunca quise escribir',autor:'Marianela dos Santos',generos:['Poesía']},
+  {titulo:'The war of art',autor:'Steven Pressfield',generos:['Psicología']},
+  {titulo:'Educated',autor:'Tara Westover',generos:['Memorias']},
+  {titulo:'El arte de la guerra',autor:'Sun Tzu',generos:['Filosofía']},
+  {titulo:'Finish what you start',autor:'Peter Hollins',generos:['Productividad']},
+  {titulo:'Arcanum Ilimitado',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'So good they can\'t ignore you',autor:'Cal Newport',generos:['Negocios']},
+  {titulo:'Las leyes de la naturaleza humana',autor:'Robert Greene',generos:['Psicología']},
+  {titulo:'12 more rules of life',autor:'Jordan Peterson',generos:['Autoayuda']},
+  {titulo:'Solve for happy',autor:'Mo Gawdat',generos:['Realizamiento']},
+  {titulo:'El pozo de la ascensión',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'How to change your mind',autor:'Michael Pollan',generos:['Salud','Psicología']},
+  {titulo:'La caída de Gondolin',autor:'J.R.R.Tolkien',generos:['Ficción','Fantasía']},
+  {titulo:'El ritmo de la guerra',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'Bigger Leaner Stronger',autor:'Michael Matthews',generos:['Salud']},
+  {titulo:'The compound effect',autor:'Darren Hardy',generos:['Dinero y finanzas']},
+  {titulo:'Start with why',autor:'Simon Sinek',generos:['Negocios']},
+  {titulo:'Los hijos de Húrin',autor:'J.R.R.Tolkien',generos:['Ficción','Fantasía']},
+  {titulo:'Mastery',autor:'Robert Greene',generos:['Psicología']},
+  {titulo:'8 rules of love',autor:'Jay Shetty',generos:['Amor y familia','Romance']},
+  {titulo:'La disciplina marcará tu destino',autor:'Ryan Holiday',generos:['Autoayuda']},
+  {titulo:'We should all be feminists',autor:'Chimamanda Ngozi',generos:['Política']},
+  {titulo:'Happy Sexy Millionaire',autor:'Steven Bartlett',generos:['Realizamiento']},
+  {titulo:'The richest man in Babylon',autor:'George Clason',generos:['Dinero y finanzas']},
+  {titulo:'The pathless path',autor:'Paul Millard',generos:['Work-life balance']},
+  {titulo:'Unconditional parenting',autor:'Alfie Kohn',generos:['Amor y familia']},
+  {titulo:'Inspired',autor:'Marty Cagan',generos:['Negocios']},
+  {titulo:'El ego es el enemigo',autor:'Ryan Holiday',generos:['Autoayuda']},
+  {titulo:'Tao te ching: el libro del camino',autor:'Lao Tzu',generos:['Realizamiento','Filosofía']},
+  {titulo:'Rework',autor:'Jason Fried',generos:['Negocios']},
+  {titulo:'El poder del ahora',autor:'Eckhart Talle',generos:['Realizamiento']},
+  {titulo:'A guide to the good life',autor:'William Irvine',generos:['Filosofía']},
+  {titulo:'The way of Zen',autor:'Alan Watts',generos:['Filosofía']},
+  {titulo:'Good vibes, good life',autor:'Vex King',generos:['Amor y familia']},
+  {titulo:'The 48 laws of power',autor:'Robert Greene',generos:['Psicología']},
+  {titulo:'Palabras radiantes',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'Hábitos Atómicos',autor:'James Clear',generos:['Autoayuda','Productividad']},
+  {titulo:'Elantris',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'Cuatro mil semanas',autor:'Oliver Burkeman',generos:['Work-life balance','Filosofía']},
+  {titulo:'El estrecho sendero entre deseos',autor:'Pat Rothfuss',generos:['Ficción','Fantasía']},
+  {titulo:'Juramentada',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'Freakonomics',autor:'Steven Levitt',generos:['Dinero y finanzas','Psicología']},
+  {titulo:'Hiperfoco',autor:'Chris Bailey',generos:['Productividad']},
+  {titulo:'The daily stoic',autor:'Ryan Holiday',generos:['Filosofía']},
+  {titulo:'12 rules of life',autor:'Jordan Peterson',generos:['Autoayuda','Filosofía']},
+  {titulo:'Sombras de identidad',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'Why we sleep',autor:'Matthew Walker',generos:['Salud']},
+  {titulo:'El camino de los reyes',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'La historia de Beren y Luthien',autor:'J.R.R.Tolkien',generos:['Ficción','Fantasía']},
+  {titulo:'Five love languages',autor:'Gary Chapman',generos:['Amor y familia']},
+  {titulo:'How to win friends',autor:'Dale Carnegie',generos:['Autoayuda']},
+  {titulo:'The body keeps the score',autor:'Bessel van der Kolk',generos:['Salud','Psicología']},
+  {titulo:'Getting things done',autor:'David Allen',generos:['Productividad']},
+  {titulo:'Mind the gap',autor:'Esther Perel',generos:['Amor y familia']},
+  {titulo:'Effortless',autor:'Greg Mckeown',generos:['Autoayuda','Productividad']},
+  {titulo:'The simple path to wealth',autor:'J.L. Collins',generos:['Dinero y finanzas']},
+  {titulo:'The school of life',autor:'Alain de Botton',generos:['Filosofía']},
+  {titulo:'The power of vulnerability',autor:'Berné Brown',generos:['Psicología']},
+  {titulo:'Brazales de duelo',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'The one thing',autor:'Gary Keller',generos:['Productividad']},
+  {titulo:'Rodeado de idiotas',autor:'Thomas Erikson',generos:['Amor y familia','Psicología']},
+  {titulo:'Contra la empatía',autor:'Paul Bloom',generos:['Psicología']},
+  {titulo:'Deep work',autor:'Cal Newport',generos:['Productividad']},
+  {titulo:'Algorithms to live by',autor:'Brian Christian',generos:['Psicología','Ciencia']},
+  {titulo:'El temor de un hombre sabio',autor:'Pat Rothfuss',generos:['Ficción','Fantasía']},
+  {titulo:'How to not die alone',autor:'Logan Ury',generos:['Amor y familia','Romance']},
+  {titulo:'Ikigai',autor:'Héctor García',generos:['Realizamiento']},
+  {titulo:'Never split the difference',autor:'Chris Voss',generos:['Negocios']},
+  {titulo:'El nombre del viento',autor:'Pat Rothfuss',generos:['Ficción','Fantasía']},
+  {titulo:'El imperio final',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'How to stop worrying and start living',autor:'Dale Carnegie',generos:['Autoayuda']},
+  {titulo:'Grit',autor:'Angela Duckworth',generos:['Psicología','Negocios']},
+  {titulo:'The evolution of desire',autor:'David Buss',generos:['Amor y familia','Psicología']},
+  {titulo:'Talking to strangers',autor:'Malcolm Gladwell',generos:['Psicología']},
+  {titulo:'The Lean Startup',autor:'Eric Ries',generos:['Negocios']},
+  {titulo:'Man\'s search for meaning',autor:'Viktor Frankl',generos:['Filosofía']},
+  {titulo:'Breath',autor:'James Nestor',generos:['Salud']},
+  {titulo:'Die with zero',autor:'Bill Perkins',generos:['Dinero y finanzas']},
+  {titulo:'The four agreements',autor:'Miguel Ángel Ruiz',generos:['Amor y familia']},
+  {titulo:'La canción de Aquiles',autor:'Madelline Miller',generos:['Ficción','Poesía']},
+  {titulo:'Nonviolent communication',autor:'Marshall Rosenberg',generos:['Amor y familia']},
+  {titulo:'Feel Good Productivity',autor:'Ali Abdaal',generos:['Productividad']},
+  {titulo:'When breath becomes air',autor:'Kalanithi Paul',generos:['Memorias']},
+  {titulo:'Aleación de ley',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:"Can't hurt me",autor:'David Goggins',generos:['Memorias']},
+  {titulo:'Happy',autor:'Derren Brown',generos:['Filosofía']},
+  {titulo:'The 5-am club',autor:'Robin Sharma',generos:['Productividad']},
+  {titulo:'Shoe dog',autor:'Phil Knight',generos:['Memorias','Productividad']},
+  {titulo:'Inteligencia intuitiva',autor:'Malcolm Gladwell',generos:['Psicología']},
+  {titulo:'El cisne negro',autor:'Nassim Taleb',generos:['Psicología','Física']},
+  {titulo:'Jugarse la piel',autor:'Nassim Taleb',generos:['Psicología']},
+  {titulo:'Antifrágil',autor:'Nassim Taleb',generos:['Psicología']},
+  {titulo:'The creative act',autor:'Rick Rubin',generos:['Psicología']},
+  {titulo:'El hombre iluminado',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'Viento y verdad',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'El señor de los anillos',autor:'J.R.R.Tolkien',generos:['Ficción','Fantasía']},
+  {titulo:'La inteligencia emocional',autor:'Daniel Goleman',generos:['Psicología']},
+  {titulo:'Sapiens',autor:'Yuval Harari',generos:['Historia','Biología']},
+  {titulo:'Before the coffee gets cold',autor:'Kawaguchi',generos:['Literatura','Romance']},
+  {titulo:'10x is easier than 2x',autor:'Dan Sullivan',generos:['Productividad','Negocios']},
+  {titulo:'Self Compassion',autor:'Kristin Neff',generos:['Psicología']},
+  {titulo:'The Hidden Life of trees',autor:'Peter Wohlleben',generos:['Biología']},
+  {titulo:'The righteous mind',autor:'Jonathan Haidt',generos:['Política','Psicología']},
+  {titulo:'The silk roads',autor:'Peter Frankopan',generos:['Historia']},
+  {titulo:'Katabasis',autor:'R.F.Kuang',generos:['Ficción','Fantasía']},
+  {titulo:'La vida invisible de Addie LaRue',autor:'V.E.Schwab',generos:['Lectura','Fantasía','Romance']},
+  {titulo:'El imperio del vampiro',autor:'Jay Kristoff',generos:['Lectura','Fantasía']},
+  {titulo:'Carl el Mazmorrero',autor:'Matt Dinniman',generos:['Lectura','Fantasía']},
+  {titulo:'Aprendiz de asesino',autor:'Robin Hobb',generos:['Lectura','Fantasía']},
+  {titulo:'Glucose Revolution',autor:'Jessie Inchauspé',generos:['Salud']},
+  {titulo:'La primera ley (trilogía)',autor:'Joe Abercrombie',generos:['Ficción','Fantasía']},
+  {titulo:'La Era de la locura (trilogía)',autor:'Joe Abercrombie',generos:['Ficción','Fantasía']},
+  {titulo:'La mejor venganza',autor:'Joe Abercrombie',generos:['Ficción','Fantasía']},
+  {titulo:'Tierras rojas',autor:'Joe Abercrombie',generos:['Ficción','Fantasía']},
+  {titulo:'Los diablos',autor:'Joe Abercrombie',generos:['Ficción','Fantasía']},
+  {titulo:'Los héroes',autor:'Joe Abercrombie',generos:['Ficción','Fantasía']},
+  {titulo:'Ciudad de hueso',autor:'Cassandra Clare',generos:['Ficción','Fantasía','Romance']},
+  {titulo:'Ciudad de cenizas',autor:'Cassandra Clare',generos:['Ficción','Fantasía','Romance']},
+  {titulo:'Ciudad de cristal',autor:'Cassandra Clare',generos:['Ficción','Fantasía','Romance']},
+  {titulo:'Ángel mecánico',autor:'Cassandra Clare',generos:['Ficción','Fantasía','Romance']},
+  {titulo:'Príncipe mecánico',autor:'Cassandra Clare',generos:['Ficción','Fantasía','Romance']},
+  {titulo:'Princesa mecánica',autor:'Cassandra Clare',generos:['Ficción','Fantasía','Romance']},
+  {titulo:'Lady Midnight',autor:'Cassandra Clare',generos:['Ficción','Fantasía','Romance']},
+  {titulo:'El señor de las sombras',autor:'Cassandra Clare',generos:['Ficción','Fantasía','Romance']},
+  {titulo:'La reina del aire y la oscuridad',autor:'Cassandra Clare',generos:['Ficción','Fantasía','Romance']},
+  {titulo:'How to build a car',autor:'Adrian Newey',generos:['Research','Memorias']},
+  {titulo:'Race car aerodynamics',autor:'Joseph Katz',generos:['Research','Ingeniería']},
+  {titulo:'Out of the wreckage',autor:'George Monbiot',generos:['Política']},
+  {titulo:'Moral Ambition',autor:'Rutger Bregman',generos:['Política']},
+  {titulo:'El señor de las moscas',autor:'William Golding',generos:['Literatura','Ficción']},
+  {titulo:'Anna Karenina',autor:'Leo Tolstoy',generos:['Literatura','Romance']},
+  {titulo:'1984',autor:'George Orwell',generos:['Literatura','Ficción']},
+  {titulo:'Granja Animal',autor:'George Orwell',generos:['Literatura','Ficción']},
+  {titulo:'Supercommunicators',autor:'Charles Duhigg',generos:['Psicología']},
+  {titulo:'Burnout',autor:'Emily Nagoski',generos:['Psicología','Salud']},
+  {titulo:'ADHD 2.0',autor:'John Ratey',generos:['Psicología','Salud']},
+  {titulo:'La Iliada',autor:'Homero',generos:['Historia','Literatura','Poesía']},
+  {titulo:'Meditaciones',autor:'Marco Aurelio',generos:['Filosofía']},
+  {titulo:'La República',autor:'Platón',generos:['Filosofía']},
+  {titulo:'Ética nicomáquea',autor:'Aristóteles',generos:['Filosofía']},
+  {titulo:'Lover girl',autor:'Raegan Fordemwalt',generos:['Poesía','Romance']},
+  {titulo:'La trilogía del mar quebrado',autor:'Joe Abercrombie',generos:['Ficción','Fantasía']},
+  {titulo:'Morning Star',autor:'Pierce Brown',generos:['Ficción','Fantasía']},
+  {titulo:'Cuentos inconclusos de la tierra media',autor:'J.R.R.Tolkien',generos:['Ficción','Fantasía']},
+  {titulo:'Arena blanca ómnibus',autor:'Brandon Sanderson',generos:['Ficción','Fantasía']},
+  {titulo:'Hábitos atómicos en acción',autor:'James Clear',generos:['Autoayuda','Productividad']},
+  {titulo:'How we learn',autor:'Stanislas Dehaene',generos:['Productividad','Ciencia']},
+  {titulo:'Tiny Experiments',autor:'Anne-Laure',generos:['Productividad']},
+  {titulo:'Six easy pieces',autor:'Richard Feynman',generos:['Física']},
+  {titulo:'Nucleares sí',autor:'Manuel Ordoñez',generos:['Física','Ciencia']},
+  {titulo:'Vida 3.0',autor:'Max Tegmark',generos:['Ciencia']},
+  {titulo:'El bosón de Higgs no te va a hacer la cama',autor:'Javi Santaolalla',generos:['Ciencia','Física']},
+  {titulo:'Kafka en la orilla',autor:'Haruki Murakami',generos:['Filosofía','Literatura']},
+  {titulo:'The molecule of more',autor:'Daniel Lieberman',generos:['Psicología','Ciencia']},
+  {titulo:'Company of One',autor:'Paul Jarvis',generos:['Productividad','Negocios']},
+  {titulo:'Aerodynamics of road vehicles',autor:'Wolf Hucho',generos:['Research','Ingeniería']},
 ]
 
 // ─────────────────────────────────────────────
@@ -51,41 +275,23 @@ function useTable(table, seedData) {
   const [loading, setLoading] = useState(true)
   const [seeded, setSeeded] = useState(false)
 
-  // Fetch ALL rows using native fetch to bypass PostgREST max-rows cap
-  const fetchAll = useCallback(async () => {
-    const url = import.meta.env.VITE_SUPABASE_URL
-    const key = import.meta.env.VITE_SUPABASE_ANON_KEY
-    const PAGE = 500
-    let all = [], from = 0
-    while (true) {
-      const res = await fetch(
-        `${url}/rest/v1/${table}?select=*&order=id.asc&limit=${PAGE}&offset=${from}`,
-        { headers: { 'apikey': key, 'Authorization': `Bearer ${key}` } }
-      )
-      if (!res.ok) break
-      const data = await res.json()
-      all = [...all, ...data]
-      if (data.length < PAGE) break
-      from += PAGE
-    }
-    return all
-  }, [table])
-
   const load = useCallback(async () => {
-    const data = await fetchAll()
-    if (data.length === 0 && !seeded) {
-      // Insert seed in batches (Supabase insert limit ~500 rows at once)
-      const BATCH = 400
-      for (let i = 0; i < seedData.length; i += BATCH) {
-        await supabase.from(table).insert(seedData.slice(i, i + BATCH))
+    const { data, error } = await supabase.from(table).select('*').order('id', { ascending: true })
+    if (!error && data) {
+      if (data.length === 0 && !seeded) {
+        // Insert seed data on first load
+        const { error: e2 } = await supabase.from(table).insert(seedData)
+        if (!e2) {
+          setSeeded(true)
+          const { data: d2 } = await supabase.from(table).select('*').order('id', { ascending: true })
+          setRows(d2 || [])
+        }
+      } else {
+        setRows(data)
       }
-      setSeeded(true)
-      setRows(await fetchAll())
-    } else {
-      setRows(data)
     }
     setLoading(false)
-  }, [table, seeded, fetchAll])
+  }, [table, seeded])
 
   useEffect(() => { load() }, [load])
 
@@ -771,3 +977,4 @@ export default function App() {
     </div>
   )
 }
+
