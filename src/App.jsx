@@ -6,7 +6,7 @@ const GENEROS = [
   'Fantasía','Ficción','Filosofía','Física','Historia','Ingeniería',
   'Lectura','Literatura','Memorias','Negocios','Poesía','Política',
   'Productividad','Psicología','Realizamiento','Research','Romance',
-  'Salud','Work-life balance'
+  'Salud','Work-life balance', 'Mitologia'
 ]
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 const FORMATOS = ['Ebook','Papel']
@@ -749,19 +749,173 @@ function LeidoFormModal({ book, bib, onSave, onClose }) {
   )
 }
 
+
+// ─── LISTA PAGE ───────────────────────────────────────────────────────────────
+function ListaPanel({who, color, lista, saveLista, bibRows, leidosRows}) {
+  const [dragIdx, setDragIdx] = useState(null)
+  const [overIdx, setOverIdx] = useState(null)
+  const [search, setSearch] = useState('')
+  const [showAdd, setShowAdd] = useState(false)
+
+  const leidosSet = useMemo(() => new Set(leidosRows.map(l => l.titulo?.toLowerCase().trim())), [leidosRows])
+
+  const items = useMemo(() =>
+    lista.map(id => bibRows.find(b => b.id === id)).filter(Boolean)
+  , [lista, bibRows])
+
+  const candidates = useMemo(() =>
+    bibRows.filter(b =>
+      !lista.includes(b.id) &&
+      !leidosSet.has(b.titulo?.toLowerCase().trim()) &&
+      (!search || b.titulo?.toLowerCase().includes(search.toLowerCase()) || b.autor?.toLowerCase().includes(search.toLowerCase()))
+    )
+  , [bibRows, lista, leidosSet, search])
+
+  function addToList(id) { saveLista([...lista, id]) }
+  function removeFromList(id) { saveLista(lista.filter(x => x !== id)) }
+  function moveUp(idx) { if (idx === 0) return; const l=[...lista]; [l[idx-1],l[idx]]=[l[idx],l[idx-1]]; saveLista(l) }
+  function moveDown(idx) { if (idx === lista.length-1) return; const l=[...lista]; [l[idx],l[idx+1]]=[l[idx+1],l[idx]]; saveLista(l) }
+
+  function onDragStart(e, idx) { setDragIdx(idx); e.dataTransfer.effectAllowed='move' }
+  function onDragOver(e, idx) { e.preventDefault(); setOverIdx(idx) }
+  function onDrop(e, idx) {
+    e.preventDefault()
+    if (dragIdx === null || dragIdx === idx) { setDragIdx(null); setOverIdx(null); return }
+    const l = [...lista]
+    const [moved] = l.splice(dragIdx, 1)
+    l.splice(idx, 0, moved)
+    saveLista(l)
+    setDragIdx(null); setOverIdx(null)
+  }
+  function onDragEnd() { setDragIdx(null); setOverIdx(null) }
+
+  return (
+    <div style={{ flex:1, minWidth:0 }}>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12, padding:'10px 14px', background:C.surface, borderRadius:10, border:`1px solid ${color}33` }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+          <div style={{ width:32, height:32, borderRadius:'50%', background:color, color:C.bg, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:900, fontSize:14 }}>{who}</div>
+          <div>
+            <div style={{ fontSize:14, fontWeight:700, color }}>{who==='K'?'👩 Kiara':'👨 Pablo'}</div>
+            <div style={{ fontSize:10, color:C.muted }}>{lista.length} libros ordenados</div>
+          </div>
+        </div>
+        <Btn label={showAdd?'✕ Cerrar':'+ Añadir'} onClick={() => setShowAdd(s => !s)} secondary sm/>
+      </div>
+
+      {showAdd && (
+        <div style={{ background:'rgba(0,0,0,0.25)', borderRadius:8, padding:12, marginBottom:12, border:`1px solid ${C.border}` }}>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar para añadir..." style={{...iS, marginBottom:8}}/>
+          <div style={{ maxHeight:200, overflowY:'auto', display:'flex', flexDirection:'column', gap:4 }}>
+            {candidates.slice(0,40).map(b => (
+              <div key={b.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 8px', background:C.surface, borderRadius:6, fontSize:12 }}>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', color:C.cream }}>{b.titulo}</div>
+                  <div style={{ fontSize:10, color:C.muted }}>{b.autor}</div>
+                </div>
+                <IBtn icon="+" onClick={() => addToList(b.id)} sm/>
+              </div>
+            ))}
+            {!candidates.length && <div style={{ color:C.muted, fontSize:12, textAlign:'center', padding:8 }}>Sin resultados</div>}
+          </div>
+        </div>
+      )}
+
+      {!items.length
+        ? <div style={{ textAlign:'center', padding:'32px 16px', color:'#445', fontSize:13, border:'1px dashed #1a4a48', borderRadius:8 }}>
+            Añade libros para ordenarlos.<br/>
+            <span style={{ fontSize:11, color:'#334' }}>El orden afecta al aleatorio.</span>
+          </div>
+        : <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+            {items.map((b, idx) => {
+              const isDragging = dragIdx === idx
+              const isOver = overIdx === idx && dragIdx !== idx
+              return (
+                <div key={b.id}
+                  draggable
+                  onDragStart={e => onDragStart(e, idx)}
+                  onDragOver={e => onDragOver(e, idx)}
+                  onDrop={e => onDrop(e, idx)}
+                  onDragEnd={onDragEnd}
+                  style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 10px', borderRadius:8, background:isDragging?'rgba(5,175,106,0.08)':C.surface, border:`1px solid ${isOver?color:isDragging?C.border:'rgba(255,255,255,0.04)'}`, opacity:isDragging?0.5:1, cursor:'grab', userSelect:'none' }}>
+                  <div style={{ width:24, height:24, borderRadius:'50%', background:idx<3?color:'#1a3a38', color:idx<3?C.bg:C.muted, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:11, flexShrink:0 }}>{idx+1}</div>
+                  <span style={{ color:'#334', fontSize:14, flexShrink:0 }}>⠿</span>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:12, color:C.cream, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{b.titulo}</div>
+                    <div style={{ fontSize:10, color:C.muted }}>{b.autor}</div>
+                  </div>
+                  {(b.recomendado_por||[]).includes(who==='K'?'P':'K') && (
+                    <span style={{ fontSize:9, padding:'1px 6px', borderRadius:8, background:`${who==='K'?C.P:C.K}22`, color:who==='K'?C.P:C.K, border:`1px solid ${who==='K'?C.P:C.K}44`, flexShrink:0 }}>
+                      💌 {who==='K'?'Pablo':'Kiara'}
+                    </span>
+                  )}
+                  <div style={{ display:'flex', flexDirection:'column', gap:2, flexShrink:0 }}>
+                    <button onClick={() => moveUp(idx)} disabled={idx===0} style={{ background:'none', border:'none', color:idx===0?'#334':C.muted, cursor:idx===0?'default':'pointer', fontSize:10, padding:'1px 4px' }}>▲</button>
+                    <button onClick={() => moveDown(idx)} disabled={idx===items.length-1} style={{ background:'none', border:'none', color:idx===items.length-1?'#334':C.muted, cursor:idx===items.length-1?'default':'pointer', fontSize:10, padding:'1px 4px' }}>▼</button>
+                  </div>
+                  <IBtn icon="✕" onClick={() => removeFromList(b.id)} danger sm/>
+                </div>
+              )
+            })}
+          </div>
+      }
+    </div>
+  )
+}
+
+function ListaPage({bib, leidos, listaK, saveListaK, listaP, saveListaP}) {
+  return (
+    <div>
+      <SH title="Listas de Prioridad" sub="Arrastra para ordenar · los primeros tienen más peso en el aleatorio"/>
+      <div style={{ fontSize:11, color:C.muted, marginBottom:16, padding:'8px 12px', background:'rgba(5,175,106,0.06)', borderRadius:8, border:'1px solid rgba(5,175,106,0.15)' }}>
+        💡 Cada uno ordena su lista de forma independiente. El aleatorio usa la posición: cuanto más arriba, más probable que salga. También puedes usar ▲▼ en móvil.
+      </div>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+        <ListaPanel who="K" color={C.K} lista={listaK} saveLista={saveListaK} bibRows={bib.rows} leidosRows={leidos.rows}/>
+        <ListaPanel who="P" color={C.P} lista={listaP} saveLista={saveListaP} bibRows={bib.rows} leidosRows={leidos.rows}/>
+      </div>
+    </div>
+  )
+}
+
 // ─── APP ROOT ────────────────────────────────────────────────────────────────
 const NAV = [
-  { id:'biblioteca', icon:'📚', label:'Biblioteca' },
-  { id:'leidos',     icon:'✅', label:'Leídos' },
+  { id:'biblioteca',   icon:'📚', label:'Biblioteca' },
+  { id:'leidos',       icon:'✅', label:'Leídos' },
+  { id:'lista',        icon:'📋', label:'Lista' },
   { id:'estadisticas', icon:'📊', label:'Stats' },
-  { id:'aleatorio',  icon:'🎲', label:'Aleatorio' },
-  { id:'comprar',    icon:'🛒', label:'Comprar' },
+  { id:'aleatorio',    icon:'🎲', label:'Aleatorio' },
+  { id:'comprar',      icon:'🛒', label:'Comprar' },
 ]
+
+function useListaStorage(key) {
+  const [lista, setLista] = useState([])
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const r = await window.storage?.get(key)
+        if (r?.value) setLista(JSON.parse(r.value))
+      } catch(e) {}
+      setLoaded(true)
+    }
+    load()
+  }, [key])
+
+  async function saveLista(newLista) {
+    setLista(newLista)
+    try { await window.storage?.set(key, JSON.stringify(newLista)) } catch(e) {}
+  }
+
+  return [lista, saveLista, loaded]
+}
 
 export default function App() {
   const [page, setPage] = useState('biblioteca')
   const leidos = useTable('leidos', SEED_LEIDOS)
   const bib    = useTable('biblioteca', SEED_BIBLIOTECA)
+  const [listaK, saveListaK] = useListaStorage('kp_listaK_v1')
+  const [listaP, saveListaP] = useListaStorage('kp_listaP_v1')
 
   return (
     <div style={{ fontFamily:"'Segoe UI',Georgia,serif", background:C.bg, minHeight:'100vh', color:C.cream, display:'flex', flexDirection:'column' }}>
@@ -787,6 +941,7 @@ export default function App() {
         <div style={{ maxWidth:980, margin:'0 auto' }}>
           {page === 'biblioteca'   && <BibliotecaPage bib={bib} leidos={leidos}/>}
           {page === 'leidos'       && <LeidosPage leidos={leidos} bib={bib}/>}
+          {page === 'lista'        && <ListaPage bib={bib} leidos={leidos} listaK={listaK} saveListaK={saveListaK} listaP={listaP} saveListaP={saveListaP}/>}
           {page === 'estadisticas' && <EstadisticasPage leidos={leidos}/>}
           {page === 'aleatorio'    && <AleatorioPage bib={bib} leidos={leidos}/>}
           {page === 'comprar'      && <ComprarPage leidos={leidos}/>}
