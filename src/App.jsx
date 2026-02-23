@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { supabase } from './supabase.js'
+import { supabase } from './supabaseClient.js'
 
 const GENEROS = [
   'Amor y familia','Autoayuda','Biología','Ciencia','Dinero y finanzas',
@@ -638,6 +638,15 @@ function ComprarPage({ leidos }) {
 }
 
 // ─── FORMS ───────────────────────────────────────────────────────────────────
+// Clean numeric fields: convert empty string to null, strings to numbers
+function cleanInts(form, fields) {
+  const out = { ...form }
+  fields.forEach(f => {
+    if (out[f] === '' || out[f] === undefined) out[f] = null
+    else if (out[f] !== null) out[f] = Number(out[f])
+  })
+  return out
+}
 function BibFormModal({ book, onSave, onClose }) {
   const [form, setForm] = useState(book ? { ...book, generos:book.generos||[], recomendado_por:book.recomendado_por||[] } : { titulo:'', autor:'', generos:[], paginas:'', recomendado_por:[] })
   const set = (k,v) => setForm(f => ({ ...f, [k]:v }))
@@ -672,7 +681,7 @@ function BibFormModal({ book, onSave, onClose }) {
       </div>
       <div style={{ display:'flex', gap:8, justifyContent:'flex-end', marginTop:16 }}>
         <Btn label="Cancelar" onClick={onClose} secondary/>
-        <Btn label="Guardar" onClick={() => { if (!form.titulo) return alert('Título obligatorio'); onSave({...form, paginas: form.paginas===''||form.paginas===null||form.paginas===undefined ? null : Number(form.paginas)}) }}/>
+        <Btn label="Guardar" onClick={() => { if (!form.titulo) return alert('Título obligatorio'); onSave(cleanInts(form, ['paginas'])) }}/>
       </div>
     </Modal>
   )
@@ -734,7 +743,7 @@ function LeidoFormModal({ book, bib, onSave, onClose }) {
       </div>
       <div style={{ display:'flex', gap:8, justifyContent:'flex-end', marginTop:14 }}>
         <Btn label="Cancelar" onClick={onClose} secondary/>
-        <Btn label="Guardar" onClick={() => { if (!form.titulo) return alert('Título obligatorio'); onSave({ ...form, total:calcT() }) }}/>
+        <Btn label="Guardar" onClick={() => { if (!form.titulo) return alert('Título obligatorio'); onSave(cleanInts({ ...form, total:calcT() }, ['paginas','personaje','prosa','trama','aprendizaje','entretenimiento','total'])) }}/>
       </div>
     </Modal>
   )
