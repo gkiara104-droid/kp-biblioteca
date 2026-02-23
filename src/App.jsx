@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { supabase } from './supabaseClient.js'
+import { supabase } from './supabase.js'
 
 const GENEROS = [
   'Amor y familia','Autoayuda','Biología','Ciencia','Dinero y finanzas',
@@ -672,7 +672,7 @@ function BibFormModal({ book, onSave, onClose }) {
       </div>
       <div style={{ display:'flex', gap:8, justifyContent:'flex-end', marginTop:16 }}>
         <Btn label="Cancelar" onClick={onClose} secondary/>
-        <Btn label="Guardar" onClick={() => { if (!form.titulo) return alert('Título obligatorio'); onSave(form) }}/>
+        <Btn label="Guardar" onClick={() => { if (!form.titulo) return alert('Título obligatorio'); onSave({...form, paginas: form.paginas===''||form.paginas===null||form.paginas===undefined ? null : Number(form.paginas)}) }}/>
       </div>
     </Modal>
   )
