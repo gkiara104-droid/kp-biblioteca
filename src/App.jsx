@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { supabase } from './supabaseClient.js'
+import { supabase } from './supabase.js'
 
 const GENEROS = [
   'Amor y familia','Autoayuda','Biología','Ciencia','Dinero y finanzas',
@@ -58,20 +58,18 @@ function useTable(table, seedData) {
   const [loading, setLoading] = useState(true)
   const [seeded, setSeeded] = useState(false)
 
-  // fetchAll: pages through ALL rows, bypassing PostgREST's default row cap
+  // fetchAll: pages through ALL rows using the Supabase client with explicit range
   const fetchAll = useCallback(async () => {
-    const url = import.meta.env.VITE_SUPABASE_URL
-    const key = import.meta.env.VITE_SUPABASE_ANON_KEY
     const PAGE = 500
     let all = [], from = 0
     while (true) {
-      const res = await fetch(
-        `${url}/rest/v1/${table}?select=*&order=id.asc&limit=${PAGE}&offset=${from}`,
-        { headers: { apikey: key, Authorization: `Bearer ${key}` } }
-      )
-      if (!res.ok) break
-      const data = await res.json()
-      if (!Array.isArray(data) || data.length === 0) break
+      const { data, error } = await supabase
+        .from(table)
+        .select('*')
+        .order('id', { ascending: true })
+        .range(from, from + PAGE - 1)
+        .limit(PAGE)
+      if (error || !data || data.length === 0) break
       all = [...all, ...data]
       if (data.length < PAGE) break
       from += PAGE
