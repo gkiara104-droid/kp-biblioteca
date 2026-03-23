@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { supabase } from './supabaseClient.js'
+import { supabase } from './supabase.js'
 
 const GENEROS = [
   'Amor y familia','Autoayuda','Biología','Ciencia','Dinero y finanzas',
   'Fantasía','Ficción','Filosofía','Física','Historia','Ingeniería',
   'Lectura','Literatura','Memorias','Negocios','Poesía','Política',
   'Productividad','Psicología','Realizamiento','Research','Romance',
-  'Salud','Work-life balance','Mitologia', 'Policiaca' , 'Comedia' 
+  'Salud','Work-life balance'
 ]
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 const FORMATOS = ['Ebook','Papel']
@@ -950,33 +950,26 @@ const NAV = [
 
 function useListaStorage(key) {
   const [lista, setLista] = useState([])
-  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    async function load() {
-      try {
-        const r = await window.storage?.get(key)
-        if (r?.value) setLista(JSON.parse(r.value))
-      } catch(e) {}
-      setLoaded(true)
-    }
-    load()
+    supabase.from('listas').select('ids').eq('id', key).single()
+      .then(({ data }) => { if (data?.ids) setLista(data.ids) })
   }, [key])
 
   async function saveLista(newLista) {
     setLista(newLista)
-    try { await window.storage?.set(key, JSON.stringify(newLista)) } catch(e) {}
+    await supabase.from('listas').upsert({ id: key, ids: newLista })
   }
 
-  return [lista, saveLista, loaded]
+  return [lista, saveLista]
 }
 
 export default function App() {
   const [page, setPage] = useState('biblioteca')
   const leidos = useTable('leidos', SEED_LEIDOS)
   const bib    = useTable('biblioteca', SEED_BIBLIOTECA)
-  const [listaK, saveListaK] = useListaStorage('kp_listaK_v1')
-  const [listaP, saveListaP] = useListaStorage('kp_listaP_v1')
+  const [listaK, saveListaK] = useListaStorage('listaK')
+  const [listaP, saveListaP] = useListaStorage('listaP')
 
   return (
     <div style={{ fontFamily:"'Segoe UI',Georgia,serif", background:C.bg, minHeight:'100vh', color:C.cream, display:'flex', flexDirection:'column' }}>
