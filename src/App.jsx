@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { supabase } from './supabaseClient.js'
+import { supabase } from './supabase.js'
 
 const SEED_GENEROS = [
   'Amor y familia','Autoayuda','Biología','Ciencia','Dinero y finanzas',
