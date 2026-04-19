@@ -609,27 +609,50 @@ function AleatorioPage({ bib, leidos, listaK, listaP, generos }) {
     return nl && mg && ma && mr
   }), [bib.rows, leidosSet, fg, autor, filterRec])
 
-  function weightedPick(books) {
-    if (!books.length) return null
-    if (peso === 0) return books[Math.floor(Math.random() * books.length)]
-    const listaUsar = quien === 'K' ? [listaK] : quien === 'P' ? [listaP] : [listaK, listaP]
-    const weighted = books.map(b => {
-      let bestScore = 0
-      listaUsar.forEach(lista => {
-        const pos = lista.findIndex(x => String(x) === String(b.id))
-        if (pos !== -1) {
-          const score = 1 - (pos / Math.max(lista.length, 1))
-          bestScore = Math.max(bestScore, score)
-        }
+ function weightedPick(books) {
+  if (!books.length) return null
+  
+  const listaUsar = quien === 'K' ? listaK : quien === 'P' ? listaP : [...new Set([...listaK, ...listaP])]
+  
+  // Si peso es 100 y hay libros en la lista, solo usar los de la lista
+  if (peso === 100 && listaUsar.length > 0) {
+    const enLista = books.filter(b => listaUsar.some(x => String(x) === String(b.id)))
+    if (enLista.length > 0) {
+      // Respetar orden: el primero tiene más peso
+      const weighted = enLista.map((b, _, arr) => {
+        const pos = listaUsar.findIndex(x => String(x) === String(b.id))
+        const score = 1 - (pos / Math.max(listaUsar.length, 1))
+        return { book: b, w: score + 0.01 }
       })
-      const w = 1 + bestScore * 3 * (peso / 100)
-      return { book: b, w }
-    })
-    const total = weighted.reduce((s, x) => s + x.w, 0)
-    let r = Math.random() * total
-    for (const { book, w } of weighted) { r -= w; if (r <= 0) return book }
-    return weighted[weighted.length - 1].book
+      const total = weighted.reduce((s, x) => s + x.w, 0)
+      let r = Math.random() * total
+      for (const { book, w } of weighted) { r -= w; if (r <= 0) return book }
+      return weighted[weighted.length - 1].book
+    }
   }
+
+  // Si peso es 0, todos igual
+  if (peso === 0) return books[Math.floor(Math.random() * books.length)]
+
+  // Mezcla: libros en lista tienen más peso, los demás tienen peso mínimo
+  const weighted = books.map(b => {
+    const pos = listaUsar.findIndex(x => String(x) === String(b.id))
+    if (pos !== -1) {
+      const score = 1 - (pos / Math.max(listaUsar.length, 1))
+      const w = 1 + score * 9 * (peso / 100)
+      return { book: b, w }
+    } else {
+      // Libros fuera de lista tienen peso reducido según el peso del slider
+      const w = 1 - (peso / 100) * 0.9
+      return { book: b, w: Math.max(w, 0.01) }
+    }
+  })
+
+  const total = weighted.reduce((s, x) => s + x.w, 0)
+  let r = Math.random() * total
+  for (const { book, w } of weighted) { r -= w; if (r <= 0) return book }
+  return weighted[weighted.length - 1].book
+}
 
   function spin() {
     if (!pool.length) return
