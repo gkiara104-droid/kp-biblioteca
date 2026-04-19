@@ -561,7 +561,7 @@ function AleatorioPage({ bib, leidos, listaK, listaP }) {
     const weighted = books.map(b => {
       let bestScore = 0
       listaUsar.forEach(lista => {
-        const pos = lista.indexOf(b.id)
+const pos = lista.findIndex(x => String(x) === String(b.id))
         if (pos !== -1) {
           const score = 1 - (pos / Math.max(lista.length, 1))
           bestScore = Math.max(bestScore, score)
@@ -820,8 +820,8 @@ function ListaPanel({who, color, lista, saveLista, bibRows, leidosRows}) {
 
   const leidosSet = useMemo(() => new Set(leidosRows.map(l => l.titulo?.toLowerCase().trim())), [leidosRows])
 
-  const items = useMemo(() =>
-    lista.map(id => bibRows.find(b => b.id === id)).filter(Boolean)
+const items = useMemo(() =>
+    lista.map(id => bibRows.find(b => String(b.id) === String(id))).filter(Boolean)
   , [lista, bibRows])
 
   const candidates = useMemo(() =>
@@ -832,8 +832,8 @@ function ListaPanel({who, color, lista, saveLista, bibRows, leidosRows}) {
     )
   , [bibRows, lista, leidosSet, search])
 
-  function addToList(id) { saveLista([...lista, id]) }
-  function removeFromList(id) { saveLista(lista.filter(x => x !== id)) }
+function addToList(id) { saveLista([...lista, String(id)]) }
+function removeFromList(id) { saveLista(lista.filter(x => String(x) !== String(id))) }
   function moveUp(idx) { if (idx === 0) return; const l=[...lista]; [l[idx-1],l[idx]]=[l[idx],l[idx-1]]; saveLista(l) }
   function moveDown(idx) { if (idx === lista.length-1) return; const l=[...lista]; [l[idx],l[idx+1]]=[l[idx+1],l[idx]]; saveLista(l) }
 
