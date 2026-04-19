@@ -952,13 +952,24 @@ function useListaStorage(key) {
   const [lista, setLista] = useState([])
 
   useEffect(() => {
-    supabase.from('listas').select('ids').eq('id', key).single()
-      .then(({ data }) => { if (data?.ids) setLista(data.ids) })
+    supabase
+      .from('listas')
+      .select('ids')
+      .eq('id', key)
+      .single()
+      .then(({ data, error }) => {
+        console.log(`[LOAD ${key}]`, JSON.stringify(data), error)
+        if (data?.ids) setLista(data.ids)
+      })
   }, [key])
 
   async function saveLista(newLista) {
     setLista(newLista)
-    await supabase.from('listas').upsert({ id: key, ids: newLista })
+    const { data, error } = await supabase
+      .from('listas')
+      .upsert({ id: key, ids: newLista })
+      .select()
+    console.log(`[SAVE ${key}]`, JSON.stringify(data), JSON.stringify(error))
   }
 
   return [lista, saveLista]
