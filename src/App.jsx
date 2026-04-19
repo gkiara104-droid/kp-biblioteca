@@ -1,26 +1,14 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { supabase } from './supabase.js'
+import { supabase } from './supabaseClient.js'
 
-function useGeneros() {
-  const [generos, setGeneros] = useState([])
+const SEED_GENEROS = [
+  'Amor y familia','Autoayuda','Biología','Ciencia','Dinero y finanzas',
+  'Fantasía','Ficción','Filosofía','Física','Historia','Ingeniería',
+  'Lectura','Literatura','Memorias','Negocios','Poesía','Política',
+  'Productividad','Psicología','Realizamiento','Research','Romance',
+  'Salud','Work-life balance','mitologia'
+]
 
-  useEffect(() => {
-    supabase.from('generos').select('*').order('nombre')
-      .then(({ data }) => { if (data) setGeneros(data.map(g => g.nombre)) })
-  }, [])
-
-  async function addGenero(nombre) {
-    const { error } = await supabase.from('generos').insert({ nombre })
-    if (!error) setGeneros(prev => [...prev, nombre].sort())
-  }
-
-  async function removeGenero(nombre) {
-    const { error } = await supabase.from('generos').delete().eq('nombre', nombre)
-    if (!error) setGeneros(prev => prev.filter(g => g !== nombre))
-  }
-
-  return { generos, addGenero, removeGenero }
-}
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 const FORMATOS = ['Ebook','Papel']
 
@@ -65,13 +53,45 @@ const SEED_BIBLIOTECA = [
   {titulo:'Miracle morning',autor:'Hal Elrod',generos:['Productividad']},
 ]
 
+// ─── GENEROS HOOK ─────────────────────────────────────────────────────────────
+function useGeneros() {
+  const [generos, setGeneros] = useState([])
+
+  useEffect(() => {
+    supabase.from('generos').select('*').order('nombre')
+      .then(({ data, error }) => {
+        if (data && data.length > 0) {
+          setGeneros(data.map(g => g.nombre))
+        } else {
+          // Seed géneros si la tabla está vacía
+          supabase.from('generos').insert(SEED_GENEROS.map(nombre => ({ nombre })))
+            .then(() => {
+              supabase.from('generos').select('*').order('nombre')
+                .then(({ data: d2 }) => { if (d2) setGeneros(d2.map(g => g.nombre)) })
+            })
+        }
+      })
+  }, [])
+
+  async function addGenero(nombre) {
+    const { error } = await supabase.from('generos').insert({ nombre })
+    if (!error) setGeneros(prev => [...prev, nombre].sort())
+  }
+
+  async function removeGenero(nombre) {
+    const { error } = await supabase.from('generos').delete().eq('nombre', nombre)
+    if (!error) setGeneros(prev => prev.filter(g => g !== nombre))
+  }
+
+  return { generos, addGenero, removeGenero }
+}
+
 // ─── SUPABASE HOOK ───────────────────────────────────────────────────────────
 function useTable(table, seedData) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [seeded, setSeeded] = useState(false)
 
-  // fetchAll: pages through ALL rows using the Supabase client with explicit range
   const fetchAll = useCallback(async () => {
     const PAGE = 500
     let all = [], from = 0
@@ -93,7 +113,6 @@ function useTable(table, seedData) {
   const load = useCallback(async () => {
     const data = await fetchAll()
     if (data.length === 0 && !seeded) {
-      // Insert seed data on first load
       const { error: e2 } = await supabase.from(table).insert(seedData)
       if (!e2) {
         setSeeded(true)
@@ -107,7 +126,6 @@ function useTable(table, seedData) {
 
   useEffect(() => { load() }, [load])
 
-  // Realtime subscription
   useEffect(() => {
     const channel = supabase
       .channel(`changes-${table}`)
@@ -136,6 +154,26 @@ function useTable(table, seedData) {
 
   return { rows, loading, insert, update, remove, reload: load }
 }
+
+// ─── LISTA STORAGE HOOK ───────────────────────────────────────────────────────
+function useListaStorage(key) {
+  const [lista, setLista] = useState([])
+
+  useEffect(() => {
+    supabase.from('listas').select('ids').eq('id', key).single()
+      .then(({ data, error }) => {
+        if (data?.ids) setLista(data.ids)
+      })
+  }, [key])
+
+  async function saveLista(newLista) {
+    setLista(newLista)
+    await supabase.from('listas').upsert({ id: key, ids: newLista }).select()
+  }
+
+  return [lista, saveLista]
+}
+
 // ─── UI ATOMS ────────────────────────────────────────────────────────────────
 const iS = { background:'rgba(0,0,0,0.3)', border:`1px solid ${C.border}`, borderRadius:6, padding:'8px 10px', color:C.cream, fontSize:13, fontFamily:'inherit', width:'100%', boxSizing:'border-box', outline:'none' }
 const sS = { ...iS, cursor:'pointer' }
@@ -181,10 +219,10 @@ function GenreTags({ generos }) {
   )
 }
 
-function GenreMultiSelect({ value = [], onChange }) {
+function GenreMultiSelect({ value = [], onChange, generos }) {
   return (
     <div style={{ display:'flex', flexWrap:'wrap', gap:5, marginTop:4 }}>
-      {GENEROS.map(g => {
+      {generos.map(g => {
         const on = value.includes(g)
         return (
           <button key={g} type="button" onClick={() => onChange(on ? value.filter(x => x !== g) : [...value, g])}
@@ -256,7 +294,7 @@ function Spinner() {
 
 // ─── PAGES ───────────────────────────────────────────────────────────────────
 
-function BibliotecaPage({ bib, leidos }) {
+function BibliotecaPage({ bib, leidos, generos }) {
   const [search, setSearch] = useState('')
   const [fg, setFg] = useState('')
   const [filterRec, setFilterRec] = useState('')
@@ -289,7 +327,7 @@ function BibliotecaPage({ bib, leidos }) {
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar título o autor..." style={{ ...iS, width:200 }}/>
         <select value={fg} onChange={e => setFg(e.target.value)} style={{ ...sS, width:190 }}>
           <option value="">Todos los géneros</option>
-          {GENEROS.map(g => <option key={g}>{g}</option>)}
+          {generos.map(g => <option key={g}>{g}</option>)}
         </select>
         <select value={filterRec} onChange={e => setFilterRec(e.target.value)} style={{ ...sS, width:190 }}>
           <option value="">💌 Todas recomendaciones</option>
@@ -344,13 +382,13 @@ function BibliotecaPage({ bib, leidos }) {
         </div>
       )}
       {(showForm || editItem) && (
-        <BibFormModal book={editItem} onSave={handleSave} onClose={() => { setShowForm(false); setEditItem(null) }}/>
+        <BibFormModal book={editItem} generos={generos} onSave={handleSave} onClose={() => { setShowForm(false); setEditItem(null) }}/>
       )}
     </div>
   )
 }
 
-function LeidosPage({ leidos, bib }) {
+function LeidosPage({ leidos, bib, generos }) {
   const [lector, setLector] = useState('Todos')
   const [fg, setFg] = useState('')
   const [mes, setMes] = useState('')
@@ -393,7 +431,7 @@ function LeidosPage({ leidos, bib }) {
         ))}
         <select value={fg} onChange={e => setFg(e.target.value)} style={{ ...sS, width:180 }}>
           <option value="">Todos géneros</option>
-          {GENEROS.map(g => <option key={g}>{g}</option>)}
+          {generos.map(g => <option key={g}>{g}</option>)}
         </select>
         <select value={mes} onChange={e => setMes(e.target.value)} style={{ ...sS, width:160 }}>
           <option value="">Todos los meses</option>
@@ -408,7 +446,7 @@ function LeidosPage({ leidos, bib }) {
       )}
       {!leidos.loading && !filtered.length && <Empty msg="Nada aquí todavía"/>}
       {(showForm || editItem) && (
-        <LeidoFormModal book={editItem} bib={bib.rows} onSave={handleSave} onClose={() => { setShowForm(false); setEditItem(null) }}/>
+        <LeidoFormModal book={editItem} bib={bib.rows} generos={generos} onSave={handleSave} onClose={() => { setShowForm(false); setEditItem(null) }}/>
       )}
     </div>
   )
@@ -546,14 +584,14 @@ function BarRow({ d, max, color }) {
   )
 }
 
-function AleatorioPage({ bib, leidos, listaK, listaP }) {
+function AleatorioPage({ bib, leidos, listaK, listaP, generos }) {
   const [rec, setRec] = useState(null)
   const [spinning, setSpinning] = useState(false)
   const [fg, setFg] = useState('')
   const [autor, setAutor] = useState('')
   const [filterRec, setFilterRec] = useState('')
   const [peso, setPeso] = useState(50)
-  const [quien, setQuien] = useState('ambos') // 'K', 'P', 'ambos'
+  const [quien, setQuien] = useState('ambos')
 
   const leidosSet = useMemo(() => new Set(leidos.rows.map(l => l.titulo?.toLowerCase().trim())), [leidos.rows])
   const autores = useMemo(() => [...new Set(bib.rows.map(b => b.autor).filter(Boolean))].sort(), [bib.rows])
@@ -566,7 +604,6 @@ function AleatorioPage({ bib, leidos, listaK, listaP }) {
     return nl && mg && ma && mr
   }), [bib.rows, leidosSet, fg, autor, filterRec])
 
-  // Weighted pick using list position
   function weightedPick(books) {
     if (!books.length) return null
     if (peso === 0) return books[Math.floor(Math.random() * books.length)]
@@ -574,13 +611,12 @@ function AleatorioPage({ bib, leidos, listaK, listaP }) {
     const weighted = books.map(b => {
       let bestScore = 0
       listaUsar.forEach(lista => {
-const pos = lista.findIndex(x => String(x) === String(b.id))
+        const pos = lista.findIndex(x => String(x) === String(b.id))
         if (pos !== -1) {
           const score = 1 - (pos / Math.max(lista.length, 1))
           bestScore = Math.max(bestScore, score)
         }
       })
-      // blend: peso=0 → all equal (w=1), peso=100 → fully position-driven
       const w = 1 + bestScore * 3 * (peso / 100)
       return { book: b, w }
     })
@@ -604,16 +640,16 @@ const pos = lista.findIndex(x => String(x) === String(b.id))
   const listaActiva = quien === 'K' ? listaK : quien === 'P' ? listaP : [...new Set([...listaK, ...listaP])]
   const getPosLabel = (b) => {
     const parts = []
-    if (listaK.indexOf(b.id) !== -1) parts.push(`#${listaK.indexOf(b.id)+1} lista K`)
-    if (listaP.indexOf(b.id) !== -1) parts.push(`#${listaP.indexOf(b.id)+1} lista P`)
+    const posK = listaK.findIndex(x => String(x) === String(b.id))
+    const posP = listaP.findIndex(x => String(x) === String(b.id))
+    if (posK !== -1) parts.push(`#${posK+1} lista K`)
+    if (posP !== -1) parts.push(`#${posP+1} lista P`)
     return parts.join(' · ')
   }
 
   return (
     <div>
       <SH title="Libro Aleatorio" sub="Déjate sorprender"/>
-
-      {/* QUIEN SOY */}
       <div style={{ display:'flex', gap:8, marginBottom:14, alignItems:'center' }}>
         <span style={{ fontSize:12, color:C.muted }}>¿Quién eres?</span>
         {[['K','👩 Kiara',C.K],['P','👨 Pablo',C.P],['ambos','👥 Ambos','#8cc']].map(([v,lbl,col]) => (
@@ -623,11 +659,10 @@ const pos = lista.findIndex(x => String(x) === String(b.id))
           </button>
         ))}
       </div>
-
       <div style={{ display:'flex', gap:8, marginBottom:12, flexWrap:'wrap' }}>
         <select value={fg} onChange={e => setFg(e.target.value)} style={{ ...sS, width:190 }}>
           <option value="">Cualquier género</option>
-          {GENEROS.map(g => <option key={g}>{g}</option>)}
+          {generos.map(g => <option key={g}>{g}</option>)}
         </select>
         <select value={autor} onChange={e => setAutor(e.target.value)} style={{ ...sS, width:190 }}>
           <option value="">Cualquier autor</option>
@@ -640,8 +675,6 @@ const pos = lista.findIndex(x => String(x) === String(b.id))
         </select>
         <span style={{ color:C.muted, fontSize:11, alignSelf:'center' }}>{pool.length} disponibles</span>
       </div>
-
-      {/* SLIDER PESO */}
       <div style={{ background:C.surface, borderRadius:10, padding:'14px 16px', marginBottom:20, border:`1px solid ${C.border}` }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
           <span style={{ fontSize:12, color:C.gold, fontWeight:700 }}>⚖️ Peso de la lista de prioridad</span>
@@ -657,7 +690,6 @@ const pos = lista.findIndex(x => String(x) === String(b.id))
           {listaActiva.length === 0 && ' · ⚠️ La lista está vacía, ve a 📋 Lista para ordenar.'}
         </div>
       </div>
-
       <div style={{ textAlign:'center', marginBottom:28 }}>
         <button onClick={spin} disabled={!pool.length || spinning}
           style={{ background:pool.length?C.green:'#1a4a48', color:C.bg, border:'none', padding:'16px 52px', borderRadius:30, fontSize:15, fontWeight:900, cursor:pool.length?'pointer':'not-allowed', fontFamily:'inherit', letterSpacing:2, opacity:pool.length?1:0.5 }}>
@@ -711,8 +743,46 @@ function ComprarPage({ leidos }) {
   )
 }
 
+// ─── AJUSTES PAGE ─────────────────────────────────────────────────────────────
+function AjustesPage({ generos, addGenero, removeGenero }) {
+  const [nuevo, setNuevo] = useState('')
+
+  return (
+    <div>
+      <SH title="⚙️ Ajustes" sub="Gestiona los géneros disponibles"/>
+      <Card title="📚 Géneros">
+        <div style={{ display:'flex', gap:8, marginBottom:16 }}>
+          <input
+            value={nuevo}
+            onChange={e => setNuevo(e.target.value)}
+            placeholder="Nuevo género..."
+            style={{ ...iS, width:200 }}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && nuevo.trim()) {
+                addGenero(nuevo.trim())
+                setNuevo('')
+              }
+            }}
+          />
+          <Btn label="+ Añadir" onClick={() => {
+            if (nuevo.trim()) { addGenero(nuevo.trim()); setNuevo('') }
+          }}/>
+        </div>
+        <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+          {generos.map(g => (
+            <div key={g} style={{ display:'flex', alignItems:'center', gap:4, padding:'4px 10px', borderRadius:12, background:'rgba(255,255,255,0.06)', border:`1px solid ${C.border}` }}>
+              <span style={{ fontSize:12, color:C.cream }}>{g}</span>
+              <button onClick={() => removeGenero(g)}
+                style={{ background:'none', border:'none', color:'#f66', cursor:'pointer', fontSize:11, padding:'0 2px' }}>✕</button>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  )
+}
+
 // ─── FORMS ───────────────────────────────────────────────────────────────────
-// Clean numeric fields: convert empty string to null, strings to numbers
 function cleanInts(form, fields) {
   const out = { ...form }
   fields.forEach(f => {
@@ -721,7 +791,8 @@ function cleanInts(form, fields) {
   })
   return out
 }
-function BibFormModal({ book, onSave, onClose }) {
+
+function BibFormModal({ book, onSave, onClose, generos }) {
   const [form, setForm] = useState(book ? { ...book, generos:book.generos||[], recomendado_por:book.recomendado_por||[] } : { titulo:'', autor:'', generos:[], paginas:'', recomendado_por:[] })
   const set = (k,v) => setForm(f => ({ ...f, [k]:v }))
   const toggleRec = (who) => {
@@ -736,7 +807,7 @@ function BibFormModal({ book, onSave, onClose }) {
         <FL label="Páginas"><input type="number" value={form.paginas||''} onChange={e => set('paginas', e.target.value)} style={iS}/></FL>
       </div>
       <FL label="Géneros (puedes elegir varios)">
-        <GenreMultiSelect value={form.generos||[]} onChange={v => set('generos', v)}/>
+        <GenreMultiSelect value={form.generos||[]} onChange={v => set('generos', v)} generos={generos}/>
       </FL>
       <div style={{ background:'rgba(0,0,0,0.2)', borderRadius:8, padding:12, marginTop:14 }}>
         <div style={{ fontSize:11, color:C.gold, fontWeight:700, marginBottom:10 }}>💌 Recomendado por</div>
@@ -761,7 +832,7 @@ function BibFormModal({ book, onSave, onClose }) {
   )
 }
 
-function LeidoFormModal({ book, bib, onSave, onClose }) {
+function LeidoFormModal({ book, bib, onSave, onClose, generos }) {
   const empty = { titulo:'', autor:'', generos:[], formato:'Ebook', lector:'K', mes_leido:'Enero', paginas:'', personaje:0, prosa:0, trama:0, aprendizaje:0, entretenimiento:0, total:0 }
   const [form, setForm] = useState(book ? { ...empty, ...book, generos:book.generos||[] } : empty)
   const set = (k,v) => setForm(f => ({ ...f, [k]:v }))
@@ -801,7 +872,7 @@ function LeidoFormModal({ book, bib, onSave, onClose }) {
         <FL label="Páginas"><input type="number" value={form.paginas||''} onChange={e => set('paginas', e.target.value)} style={iS}/></FL>
       </div>
       <FL label="Géneros (puedes elegir varios)">
-        <GenreMultiSelect value={form.generos||[]} onChange={v => set('generos', v)}/>
+        <GenreMultiSelect value={form.generos||[]} onChange={v => set('generos', v)} generos={generos}/>
       </FL>
       <div style={{ background:'rgba(0,0,0,0.25)', borderRadius:8, padding:12, marginTop:12 }}>
         <div style={{ fontSize:12, color:C.gold, marginBottom:10, fontWeight:700 }}>Puntuación (0 – 10)</div>
@@ -823,7 +894,6 @@ function LeidoFormModal({ book, bib, onSave, onClose }) {
   )
 }
 
-
 // ─── LISTA PAGE ───────────────────────────────────────────────────────────────
 function ListaPanel({who, color, lista, saveLista, bibRows, leidosRows}) {
   const [dragIdx, setDragIdx] = useState(null)
@@ -833,20 +903,21 @@ function ListaPanel({who, color, lista, saveLista, bibRows, leidosRows}) {
 
   const leidosSet = useMemo(() => new Set(leidosRows.map(l => l.titulo?.toLowerCase().trim())), [leidosRows])
 
-const items = useMemo(() =>
+  const items = useMemo(() =>
     lista.map(id => bibRows.find(b => String(b.id) === String(id))).filter(Boolean)
   , [lista, bibRows])
 
   const candidates = useMemo(() =>
     bibRows.filter(b =>
+      !lista.includes(String(b.id)) &&
       !lista.includes(b.id) &&
       !leidosSet.has(b.titulo?.toLowerCase().trim()) &&
       (!search || b.titulo?.toLowerCase().includes(search.toLowerCase()) || b.autor?.toLowerCase().includes(search.toLowerCase()))
     )
   , [bibRows, lista, leidosSet, search])
 
-function addToList(id) { saveLista([...lista, String(id)]) }
-function removeFromList(id) { saveLista(lista.filter(x => String(x) !== String(id))) }
+  function addToList(id) { saveLista([...lista, String(id)]) }
+  function removeFromList(id) { saveLista(lista.filter(x => String(x) !== String(id))) }
   function moveUp(idx) { if (idx === 0) return; const l=[...lista]; [l[idx-1],l[idx]]=[l[idx],l[idx-1]]; saveLista(l) }
   function moveDown(idx) { if (idx === lista.length-1) return; const l=[...lista]; [l[idx],l[idx+1]]=[l[idx+1],l[idx]]; saveLista(l) }
 
@@ -951,7 +1022,7 @@ function ListaPage({bib, leidos, listaK, saveListaK, listaP, saveListaP}) {
   )
 }
 
-// ─── APP ROOT ────────────────────────────────────────────────────────────────
+// ─── NAV ─────────────────────────────────────────────────────────────────────
 const NAV = [
   { id:'biblioteca',   icon:'📚', label:'Biblioteca' },
   { id:'leidos',       icon:'✅', label:'Leídos' },
@@ -959,80 +1030,17 @@ const NAV = [
   { id:'estadisticas', icon:'📊', label:'Stats' },
   { id:'aleatorio',    icon:'🎲', label:'Aleatorio' },
   { id:'comprar',      icon:'🛒', label:'Comprar' },
-  { id:'ajustes', icon:'⚙️', label:'Ajustes' },
+  { id:'ajustes',      icon:'⚙️', label:'Ajustes' },
 ]
 
-function useListaStorage(key) {
-  const [lista, setLista] = useState([])
-
-  useEffect(() => {
-    supabase
-      .from('listas')
-      .select('ids')
-      .eq('id', key)
-      .single()
-      .then(({ data, error }) => {
-        console.log(`[LOAD ${key}]`, JSON.stringify(data), error)
-        if (data?.ids) setLista(data.ids)
-      })
-  }, [key])
-
-  async function saveLista(newLista) {
-    setLista(newLista)
-    const { data, error } = await supabase
-      .from('listas')
-      .upsert({ id: key, ids: newLista })
-      .select()
-    console.log(`[SAVE ${key}]`, JSON.stringify(data), JSON.stringify(error))
-  }
-
-  return [lista, saveLista]
-}
-
+// ─── APP ROOT ────────────────────────────────────────────────────────────────
 export default function App() {
-  function AjustesPage({ generos, addGenero, removeGenero }) {
-  const [nuevo, setNuevo] = useState('')
-
-  return (
-    <div>
-      <SH title="⚙️ Ajustes" sub="Gestiona los géneros disponibles"/>
-      <Card title="📚 Géneros">
-        <div style={{ display:'flex', gap:8, marginBottom:16 }}>
-          <input
-            value={nuevo}
-            onChange={e => setNuevo(e.target.value)}
-            placeholder="Nuevo género..."
-            style={{ ...iS, width:200 }}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && nuevo.trim()) {
-                addGenero(nuevo.trim())
-                setNuevo('')
-              }
-            }}
-          />
-          <Btn label="+ Añadir" onClick={() => {
-            if (nuevo.trim()) { addGenero(nuevo.trim()); setNuevo('') }
-          }}/>
-        </div>
-        <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
-          {generos.map(g => (
-            <div key={g} style={{ display:'flex', alignItems:'center', gap:4, padding:'4px 10px', borderRadius:12, background:'rgba(255,255,255,0.06)', border:`1px solid ${C.border}` }}>
-              <span style={{ fontSize:12, color:C.cream }}>{g}</span>
-              <button onClick={() => removeGenero(g)}
-                style={{ background:'none', border:'none', color:'#f66', cursor:'pointer', fontSize:11, padding:'0 2px' }}>✕</button>
-            </div>
-          ))}
-        </div>
-      </Card>
-    </div>
-  )
-}
   const [page, setPage] = useState('biblioteca')
   const leidos = useTable('leidos', SEED_LEIDOS)
   const bib    = useTable('biblioteca', SEED_BIBLIOTECA)
-  const { generos: GENEROS, addGenero, removeGenero } = useGeneros()
   const [listaK, saveListaK] = useListaStorage('listaK')
   const [listaP, saveListaP] = useListaStorage('listaP')
+  const { generos, addGenero, removeGenero } = useGeneros()
 
   return (
     <div style={{ fontFamily:"'Segoe UI',Georgia,serif", background:C.bg, minHeight:'100vh', color:C.cream, display:'flex', flexDirection:'column' }}>
@@ -1056,13 +1064,13 @@ export default function App() {
       </div>
       <div style={{ flex:1, overflowY:'auto', padding:'20px 16px' }}>
         <div style={{ maxWidth:980, margin:'0 auto' }}>
-          {page === 'biblioteca'   && <BibliotecaPage bib={bib} leidos={leidos}/>}
-          {page === 'leidos'       && <LeidosPage leidos={leidos} bib={bib}/>}
+          {page === 'biblioteca'   && <BibliotecaPage bib={bib} leidos={leidos} generos={generos}/>}
+          {page === 'leidos'       && <LeidosPage leidos={leidos} bib={bib} generos={generos}/>}
           {page === 'lista'        && <ListaPage bib={bib} leidos={leidos} listaK={listaK} saveListaK={saveListaK} listaP={listaP} saveListaP={saveListaP}/>}
           {page === 'estadisticas' && <EstadisticasPage leidos={leidos}/>}
-          {page === 'aleatorio'    && <AleatorioPage bib={bib} leidos={leidos} listaK={listaK} listaP={listaP}/>}
+          {page === 'aleatorio'    && <AleatorioPage bib={bib} leidos={leidos} listaK={listaK} listaP={listaP} generos={generos}/>}
           {page === 'comprar'      && <ComprarPage leidos={leidos}/>}
-          {page === 'ajustes' && <AjustesPage generos={GENEROS} addGenero={addGenero} removeGenero={removeGenero}/>}
+          {page === 'ajustes'      && <AjustesPage generos={generos} addGenero={addGenero} removeGenero={removeGenero}/>}
         </div>
       </div>
     </div>
