@@ -1,13 +1,26 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { supabase } from './supabase.js'
 
-const GENEROS = [
-  'Amor y familia','Autoayuda','Biología','Ciencia','Dinero y finanzas',
-  'Fantasía','Ficción','Filosofía','Física','Historia','Ingeniería',
-  'Lectura','Literatura','Memorias','Negocios','Poesía','Política',
-  'Productividad','Psicología','Realizamiento','Research','Romance',
-  'Salud','Work-life balance','mitologia'
-]
+function useGeneros() {
+  const [generos, setGeneros] = useState([])
+
+  useEffect(() => {
+    supabase.from('generos').select('*').order('nombre')
+      .then(({ data }) => { if (data) setGeneros(data.map(g => g.nombre)) })
+  }, [])
+
+  async function addGenero(nombre) {
+    const { error } = await supabase.from('generos').insert({ nombre })
+    if (!error) setGeneros(prev => [...prev, nombre].sort())
+  }
+
+  async function removeGenero(nombre) {
+    const { error } = await supabase.from('generos').delete().eq('nombre', nombre)
+    if (!error) setGeneros(prev => prev.filter(g => g !== nombre))
+  }
+
+  return { generos, addGenero, removeGenero }
+}
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 const FORMATOS = ['Ebook','Papel']
 
@@ -946,6 +959,7 @@ const NAV = [
   { id:'estadisticas', icon:'📊', label:'Stats' },
   { id:'aleatorio',    icon:'🎲', label:'Aleatorio' },
   { id:'comprar',      icon:'🛒', label:'Comprar' },
+  { id:'ajustes', icon:'⚙️', label:'Ajustes' },
 ]
 
 function useListaStorage(key) {
@@ -976,9 +990,47 @@ function useListaStorage(key) {
 }
 
 export default function App() {
+  function AjustesPage({ generos, addGenero, removeGenero }) {
+  const [nuevo, setNuevo] = useState('')
+
+  return (
+    <div>
+      <SH title="⚙️ Ajustes" sub="Gestiona los géneros disponibles"/>
+      <Card title="📚 Géneros">
+        <div style={{ display:'flex', gap:8, marginBottom:16 }}>
+          <input
+            value={nuevo}
+            onChange={e => setNuevo(e.target.value)}
+            placeholder="Nuevo género..."
+            style={{ ...iS, width:200 }}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && nuevo.trim()) {
+                addGenero(nuevo.trim())
+                setNuevo('')
+              }
+            }}
+          />
+          <Btn label="+ Añadir" onClick={() => {
+            if (nuevo.trim()) { addGenero(nuevo.trim()); setNuevo('') }
+          }}/>
+        </div>
+        <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+          {generos.map(g => (
+            <div key={g} style={{ display:'flex', alignItems:'center', gap:4, padding:'4px 10px', borderRadius:12, background:'rgba(255,255,255,0.06)', border:`1px solid ${C.border}` }}>
+              <span style={{ fontSize:12, color:C.cream }}>{g}</span>
+              <button onClick={() => removeGenero(g)}
+                style={{ background:'none', border:'none', color:'#f66', cursor:'pointer', fontSize:11, padding:'0 2px' }}>✕</button>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  )
+}
   const [page, setPage] = useState('biblioteca')
   const leidos = useTable('leidos', SEED_LEIDOS)
   const bib    = useTable('biblioteca', SEED_BIBLIOTECA)
+  const { generos: GENEROS, addGenero, removeGenero } = useGeneros()
   const [listaK, saveListaK] = useListaStorage('listaK')
   const [listaP, saveListaP] = useListaStorage('listaP')
 
@@ -1010,6 +1062,7 @@ export default function App() {
           {page === 'estadisticas' && <EstadisticasPage leidos={leidos}/>}
           {page === 'aleatorio'    && <AleatorioPage bib={bib} leidos={leidos} listaK={listaK} listaP={listaP}/>}
           {page === 'comprar'      && <ComprarPage leidos={leidos}/>}
+          {page === 'ajustes' && <AjustesPage generos={GENEROS} addGenero={addGenero} removeGenero={removeGenero}/>}
         </div>
       </div>
     </div>
