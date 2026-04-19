@@ -6,7 +6,7 @@ const GENEROS = [
   'Fantasía','Ficción','Filosofía','Física','Historia','Ingeniería',
   'Lectura','Literatura','Memorias','Negocios','Poesía','Política',
   'Productividad','Psicología','Realizamiento','Research','Romance',
-  'Salud','Work-life balance'
+  'Salud','Work-life balance','mitologia'
 ]
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 const FORMATOS = ['Ebook','Papel']
