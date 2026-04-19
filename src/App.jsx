@@ -593,7 +593,12 @@ function AleatorioPage({ bib, leidos, listaK, listaP, generos }) {
   const [peso, setPeso] = useState(50)
   const [quien, setQuien] = useState('ambos')
 
-  const leidosSet = useMemo(() => new Set(leidos.rows.map(l => l.titulo?.toLowerCase().trim())), [leidos.rows])
+  const leidosSet = useMemo(() => {
+  const rows = quien === 'ambos'
+    ? leidos.rows
+    : leidos.rows.filter(l => l.lector === quien)
+  return new Set(rows.map(l => l.titulo?.toLowerCase().trim()))
+}, [leidos.rows, quien])
   const autores = useMemo(() => [...new Set(bib.rows.map(b => b.autor).filter(Boolean))].sort(), [bib.rows])
 
   const pool = useMemo(() => bib.rows.filter(b => {
@@ -901,7 +906,9 @@ function ListaPanel({who, color, lista, saveLista, bibRows, leidosRows}) {
   const [search, setSearch] = useState('')
   const [showAdd, setShowAdd] = useState(false)
 
-  const leidosSet = useMemo(() => new Set(leidosRows.map(l => l.titulo?.toLowerCase().trim())), [leidosRows])
+  const leidosSet = useMemo(() => new Set(
+  leidosRows.filter(l => l.lector === who).map(l => l.titulo?.toLowerCase().trim())
+), [leidosRows, who])
 
   const items = useMemo(() =>
     lista.map(id => bibRows.find(b => String(b.id) === String(id))).filter(Boolean)
